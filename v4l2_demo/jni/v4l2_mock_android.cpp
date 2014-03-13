@@ -13,6 +13,16 @@
 
 #define BUFFER_COUNT 4
 
+
+//====================================================
+//Google del some of ioctl. now manually add it for v4l2
+
+#define V4L2_CTRL_CLASS_CAMERA 	0x009a0000
+#define V4L2_CID_CAMERA_CLASS_BASE 	(V4L2_CTRL_CLASS_CAMERA | 0x900)
+
+#define V4L2_CID_EXPOSURE_ABSOLUTE		(V4L2_CID_CAMERA_CLASS_BASE+2)
+//===================================================
+
 //used to visit the mapped mems
 typedef struct v4l2_mem_map_t{
 	void *	mem[BUFFER_COUNT]; 
@@ -24,7 +34,7 @@ v4l2_mem_map_t					mMapMem;
 #define UNKNOWN_ERROR -6
 
 
-char *g_pchDevName = "/dev/video0";
+char g_pchDevName[255] = "/dev/video0";
 int g_nCamFD = 0;// file-descriptor of camera-device
 int g_nCaptureFmt = 0; //pix-format
 
@@ -35,25 +45,27 @@ int openDevice()
 
 	if(-1 == g_nCamFD)
 	{
-		char *dev0 = "/dev/video0";
-		char *dev1 = "/dev/video1";
-		printf("ERROR opening %s: %s",g_pchDevName,strerror(errno));
+		char dev0[255];
+		sprintf(dev0,"/dev/video0");
+		char dev1[255];
+		sprintf(dev0,"/dev/video1");
+		printf("ERROR opening %s: %s\n",g_pchDevName,strerror(errno));
 
 		if( 0 != strncmp( g_pchDevName, dev0, strlen(dev0) ) )//if not dev0
 		{
-			strncpy(g_pchDevName,dev0,strlen(0));
+			strncpy(g_pchDevName,dev0,strlen(dev0));
 		}
 		else
 		{
-			strncpy(g_pchDevName,dev1,strlen(0));
+			strncpy(g_pchDevName,dev1,strlen(dev1));
 		}
 
-		printf("Try open another Camera %s", g_pchDevName);
+		printf("Try open another Camera %s\n", g_pchDevName);
 		g_nCamFD = open(g_pchDevName, O_RDWR | O_NONBLOCK,0);
 
 		if(-1 == g_nCamFD)
 		{
-			printf("Try fail, ERROR opening %s: %s",g_pchDevName,strerror(errno));
+			printf("Try fail, ERROR opening %s: %s\n",g_pchDevName,strerror(errno));
 
 			//OPEN FAIL
 			return -1;
@@ -112,6 +124,50 @@ int tryFmt(int format)
 
 	return -1;
 
+}
+
+int set_abs_exposure(int exp_value)
+{
+	printf("\n========now play with ABS-EXPOSURE========\n");
+	struct v4l2_control ctrl;
+
+
+	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	int ret = ioctl(g_nCamFD,VIDIOC_G_CTRL, &ctrl);
+	if(ret < 0)
+	{
+		printf("Get abs exposure fail with return is %d!\n",ret);
+	}
+	else
+	{
+		printf("Get abs exposure success with value is %d!\n",ctrl.value);
+	}
+
+	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ctrl.value = exp_value;
+	ret = ioctl(g_nCamFD, VIDIOC_S_CTRL, &ctrl);
+	if(ret < 0)
+	{
+		printf("Set abs exposure fail with return is %d!\n",ret);
+	}
+	else
+	{
+		printf("Set abs exposure success to value  %d\n",ctrl.value);
+	}
+
+	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ret = ioctl(g_nCamFD,VIDIOC_G_CTRL, &ctrl);
+	if(ret < 0)
+	{
+		printf("After set,Get abs exposure fail with return is %d!\n",ret);
+	}
+	else
+	{
+		printf("After set,Get abs exposure success with exp is %d!\n",ctrl.value);
+	}
+
+	printf("\n========play with ABS-EXPOSURE end========\n");
+	return 0;
 }
 
 int queryBuf()
@@ -205,14 +261,31 @@ int main()
 		printf("open device error!\n");
 		return -1;
 	}
+	else
+	{
+		printf("open device success!\n");
+	}
 
 	//Step 0.1 Open then set input
 	struct v4l2_input inp;
 	inp.index = 0;
 	if(-1 == ioctl(g_nCamFD, VIDIOC_S_INPUT,&inp))
 	{
-		printf("VIDIOC_S_INPUT error!");
+		printf("VIDIOC_S_INPUT error!\n");
 		return -1;
+	}
+	else
+	{
+		printf("VIDIOC_S_INPUT success!\n");
+		printf("\t inp.index is %d:\n!",inp.index);
+		printf("\t inp.name[32] is %s!\n",inp.name);
+		printf("\t inp.type is %d!\n",inp.type);
+		printf("\t inp.audioset is %d!\n",inp.audioset);
+		printf("\t inp.tuner is %d!\n",inp.tuner);
+		printf("\t inp.std is %d!\n",(int)inp.std);
+		printf("\t inp.status is %d!\n",inp.status);
+		//printf("\t inp.capabilities is %d!\n",inp.capabilities);
+		sleep(3);
 	}
 	
 	//step0.2: Check capability
@@ -252,7 +325,7 @@ int main()
 	ret = ioctl(g_nCamFD,VIDIOC_S_PARM,&params);
 	if(ret < 0)
 	{
-		printf("the ret is %d, v4l2setCaptureParams failed 251!\n",ret);
+		printf("setCaptureParams failed with ret is %d!\n",ret);
 		return ret;
 	}
 	else if(0 == ret)
@@ -303,6 +376,9 @@ int main()
 		printf("set fmt right!\n");
 	}
 
+	//Step SettingX: Abs Exposure
+	set_abs_exposure(900);
+
 	////////////////////////////////////////////////////////////////////////
 	//Step1: Request buffer
 	struct v4l2_requestbuffers rb;
@@ -318,6 +394,10 @@ int main()
 	{
 		printf("Init: VIDIOC_REQBUFS failed: %s", strerror(errno));
 		return ret;
+	}
+	else
+	{
+		printf("Init: VIDIOC_REQBUFS sucess!\n");
 	}
 
 	if(BUFFER_COUNT != rb.count)
@@ -431,10 +511,10 @@ int main()
 	}
 
 	//End1.3 close the device
-	if(NULL != g_nCamFD)//close the device
+	if(0 != g_nCamFD)//close the device
 	{
 		close(g_nCamFD);
-		g_nCamFD = NULL;
+		g_nCamFD = 0;
 	}
 	
 	return 0;
