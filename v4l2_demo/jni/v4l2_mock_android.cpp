@@ -13,9 +13,40 @@
 
 #define BUFFER_COUNT 4
 
+//redefine the Macro for ABS-exposure
+
+//this struct was according the A20 platform {{ --------------
+struct v4l2_control_
+{
+	__u32 id;
+	__s32 value;
+	__u32 user_pt;  //this was new added by A20 engineer
+};
+
+//
+//this line is important. Because 'v4l2_control' was used as below
+//
+#define v4l2_control v4l2_control_ 
+
+#ifdef VIDIOC_G_CTRL
+	#undef VIDIOC_G_CTRL
+	#define VIDIOC_G_CTRL _IOWR ('V', 27, struct v4l2_control_)
+#endif
+
+#ifdef VIDIOC_S_CTRL
+	#undef VIDIOC_S_CTRL
+	#define VIDIOC_S_CTRL _IOWR ('V', 28, struct v4l2_control_)
+#endif
+
+#ifdef __OLD_VIDIOC_
+#define VIDIOC_S_CTRL_OLD _IOW ('V', 28, struct v4l2_control_)
+#endif
+//modify struct end by Eric ----------------}}
 
 //====================================================
 //Google del some of ioctl. now manually add it for v4l2
+
+
 
 #define V4L2_CTRL_CLASS_CAMERA 	0x009a0000
 #define V4L2_CID_CAMERA_CLASS_BASE 	(V4L2_CTRL_CLASS_CAMERA | 0x900)
@@ -378,6 +409,7 @@ int main()
 
 	//Step SettingX: Abs Exposure
 	set_abs_exposure(900);
+	//sleep(5);
 
 	////////////////////////////////////////////////////////////////////////
 	//Step1: Request buffer
@@ -390,6 +422,7 @@ int main()
 	rb.count = BUFFER_COUNT;
 
 	ret = ioctl(g_nCamFD, VIDIOC_REQBUFS, &rb);
+	printf("after ret = ioctl(g_nCamFD, VIDIOC_REQBUFS, &rb)\n");
 	if(ret < 0)
 	{
 		printf("Init: VIDIOC_REQBUFS failed: %s", strerror(errno));
@@ -410,12 +443,13 @@ int main()
 
 	////////////////////////////////////////////////////////////////////////
 	//Step2  query the Buf and map to 
+	printf("before queryBuf!\n");
 	queryBuf();
-
+	printf("after queryBuf!\n");
 	////////////////////////////////////////////////////////////////////////
 	//Step3 start Streaming
 	startStreaming();
-	
+	printf("after startStreaming!\n");
 	////////////////////////////////////////////////////////////////////////
 	//Step4 Read Buffer
 	v4l2_buffer buf_read;
@@ -458,21 +492,21 @@ int main()
 			//break;
 
 		//////////////////write the //buffer/////////////////////////////
-		if(0 == (i % 10))
-		{
-			sprintf(pFrameName, "myFrame%d.data", totalFrame);
-			FILE *pFile = fopen(pFrameName,"wb");
-			if(pFile != NULL)
-			{
-				fwrite ((char*)mMapMem.mem[n_buf_index], mMapMem.length, 1, pFile);
-				printf("write!\n");
-				fclose (pFile);
-			}
-			else
-			{
-				printf("open file error!\n");
-			}
-		}
+		//if(0 == (i % 10))
+		//{
+		//	sprintf(pFrameName, "myFrame%d.data", totalFrame);
+		//	FILE *pFile = fopen(pFrameName,"wb");
+		//	if(pFile != NULL)
+		//	{
+		//		fwrite ((char*)mMapMem.mem[n_buf_index], mMapMem.length, 1, pFile);
+		//		printf("write!\n");
+		//		fclose (pFile);
+		//	}
+		//	else
+		//	{
+		//		printf("open file error!\n");
+		//	}
+		//}
 		//////////////////write the //buffer/////////////////////////////
 
 		//Re-queue 
