@@ -92,7 +92,6 @@ int socket_server_tansfer_cam_frame()
 	V4L2_Camera *cam = new V4L2_Camera();
 	cam->open_cam();
 	//cam->set_abs_exposure(987);
-	usleep(100*1000);
 
 	char *frame_buf = (char*)malloc(640*480*2*sizeof(char));
 
@@ -107,7 +106,7 @@ int socket_server_tansfer_cam_frame()
 		}
 
 		//poll
-		int poll_ret = poll(ufds,5,500);
+		int poll_ret = poll(ufds,5,100);
 
 		if(poll_ret == -1)
 		{
@@ -150,7 +149,7 @@ int socket_server_tansfer_cam_frame()
 			{
 				int pos = 0;
 				int sent_len = 0;
-				int size_to_send = sizeof(frame_buf);
+				int size_to_send = 640*480*2;
 				while(pos < size_to_send)
 				{
 					sent_len = send(ufds[i].fd, frame_buf + pos, size_to_send - pos, 0);
