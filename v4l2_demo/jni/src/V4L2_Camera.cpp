@@ -23,10 +23,6 @@ map_mem_(),
 v4l2_buf_read_()
 {
 	snprintf(cam_name_, 255, "/dev/video0");
-
-	v4l2_buf_read_.type=V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	v4l2_buf_read_.memory=V4L2_MEMORY_MMAP;
-
 }
 
 V4L2_Camera::~V4L2_Camera()
@@ -77,40 +73,6 @@ int V4L2_Camera::set_pixel_format(int pix_fmt)
 		return -1;
 	}
 
-	//Step SettingX: set capture mode from V4L2CameraDevice.cpp line 330
-	struct v4l2_streamparm params;
-	params.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
-	params.parm.capture.timeperframe.denominator = 1;
-	params.parm.capture.timeperframe.numerator = 15;
-	//params.parm.capture.capturemode = V4L2_MODE_VIDEO;//can't find defination?
-	ret = ioctl(cam_fd_,VIDIOC_S_PARM,&params);
-	if(ret < 0)
-	{
-		printf("setCaptureParams failed with ret is %d!\n",ret);
-		return ret;
-	}
-	else if(0 == ret)
-	{
-		//Get the value to check
-		printf("ret of VIDIOC_S_PARM is %d!\n",ret);
-		ret = ioctl(cam_fd_,VIDIOC_G_PARM,&params);
-		if(0 == ret)
-		{
-			int nGetNumerator = params.parm.capture.timeperframe.numerator;
-			int nGetDenominator = params.parm.capture.timeperframe.denominator;
-			if(30 == nGetNumerator && 1 == nGetDenominator)
-			{
-				printf("v4l2setCaptureParams ok!\n");
-			}
-			else
-			{
-				printf("eric: numerator/denominator:%d/%d\n",nGetNumerator,nGetDenominator);
-				sleep(5);
-			}
-		}
-	}
-
 	struct v4l2_format format;
 	memset(&format, 0, sizeof(format));
 
@@ -134,8 +96,7 @@ int V4L2_Camera::open_cam()
 {
 	int ret = -1;
 
-	//ret = open_cam_();
-	ret = openDevice();
+	ret = open_cam_();
 	if(ret < 0)
 	{
 		printf("open_cam_ failed with ret %d\n",ret);
@@ -171,6 +132,7 @@ int V4L2_Camera::open_cam()
 	ret = start_streaming_();
 	printf("start_streaming_()\n");
 	sleep(1);
+
 
 	return 0;
 }
@@ -377,10 +339,10 @@ int V4L2_Camera::grab_frame()
 	
 	//clear old
 	//v4l2_buf_read_.index= n_buf_index;
+	memset(&v4l2_buf_read_, 0, sizeof(v4l2_buf_read_));	
 	v4l2_buf_read_.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	v4l2_buf_read_.memory = V4L2_MEMORY_MMAP;
 	v4l2_buf_read_.index = 0;
-	memset(&v4l2_buf_read_, 0, sizeof(v4l2_buf_read_));	
 
 	do
 	{
@@ -434,43 +396,5 @@ int V4L2_Camera::query_frame(char *&out_pixel_buffer)
 		return -2;
 	}
 
-	return 0;
-}
-
- 
-
-int V4L2_Camera::openDevice()
-{
-
-	cam_fd_ = open(cam_name_, O_RDWR | O_NONBLOCK,0);
-
-	if(-1 == cam_fd_)
-	{
-		char dev0[255];
-		sprintf(dev0,"/dev/video0");
-		char dev1[255];
-		sprintf(dev0,"/dev/video1");
-		printf("ERROR opening %s: %s\n",cam_name_,strerror(errno));
-
-		if( 0 != strncmp( cam_name_, dev0, strlen(dev0) ) )//if not dev0
-		{
-			strncpy(cam_name_,dev0,strlen(dev0));
-		}
-		else
-		{
-			strncpy(cam_name_,dev1,strlen(dev1));
-		}
-
-		printf("Try open another Camera %s\n", cam_name_);
-		cam_fd_ = open(cam_name_, O_RDWR | O_NONBLOCK,0);
-
-		if(-1 == cam_fd_)
-		{
-			printf("Try fail, ERROR opening %s: %s\n",cam_name_,strerror(errno));
-
-			//OPEN FAIL
-			return -1;
-		}
-	}
 	return 0;
 }

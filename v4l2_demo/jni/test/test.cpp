@@ -172,12 +172,12 @@ int socket_server_tansfer_cam_frame()
 int test_cam()
 {
 	V4L2_Camera *cam = new V4L2_Camera();
-	cam->open();
+	cam->open_cam();
 	return 0;
 }
 int main()
 {
-	//socket_server_tansfer_cam_frame();	
-	test_cam();
+	socket_server_tansfer_cam_frame();	
+	//test_cam();
 	return 0;
 }

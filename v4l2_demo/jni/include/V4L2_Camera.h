@@ -25,7 +25,6 @@ public:
 
 private:
 	int open_cam_();
-	int openDevice();
 	int set_input_();
 	int check_capability_();
 	int check_support_fmt_(int pix_fmt);
