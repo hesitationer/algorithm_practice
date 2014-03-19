@@ -294,7 +294,7 @@ int main()
 	}
 	else
 	{
-		printf("open device success!\n");
+		printf("open device success with fd is %d!\n",g_nCamFD);
 	}
 
 	//Step 0.1 Open then set input
@@ -351,7 +351,7 @@ int main()
 	params.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 	params.parm.capture.timeperframe.denominator = 1;
-	params.parm.capture.timeperframe.numerator = 30;
+	params.parm.capture.timeperframe.numerator = 15;
 	//params.parm.capture.capturemode = V4L2_MODE_VIDEO;//can't find defination?
 	ret = ioctl(g_nCamFD,VIDIOC_S_PARM,&params);
 	if(ret < 0)
@@ -362,7 +362,7 @@ int main()
 	else if(0 == ret)
 	{
 		//Get the value to check
-		sleep(1);
+		printf("ret of VIDIOC_S_PARM is %d!\n",ret);
 		ret = ioctl(g_nCamFD,VIDIOC_G_PARM,&params);
 		if(0 == ret)
 		{
@@ -371,6 +371,11 @@ int main()
 			if(30 == nGetNumerator && 1 == nGetDenominator)
 			{
 				printf("v4l2setCaptureParams ok!\n");
+			}
+			else
+			{
+				printf("eric: numerator/denominator:%d/%d\n",nGetNumerator,nGetDenominator);
+				sleep(5);
 			}
 		}
 	}
