@@ -27,8 +27,9 @@ public:
 	int retrieve_frame(char *&out_pixel_buffer);
 	int query_frame(char *&out_pixel_buffer);
 
-private:
+//private:
 	int open_cam_();
+	int get_input_();
 	int set_input_();
 	int check_capability_();
 	int check_support_fmt_(int pix_fmt);

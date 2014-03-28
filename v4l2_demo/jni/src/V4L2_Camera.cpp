@@ -14,6 +14,33 @@
 
 
 
+//this struct was according the A20 platform {{ --------------
+struct v4l2_control_
+{
+	__u32 id;
+	__s32 value;
+	__u32 user_pt;  //this was new added by A20 engineer
+};
+
+//
+//this line is important. Because 'v4l2_control' was used as below
+//
+#define v4l2_control v4l2_control_ 
+
+#ifdef VIDIOC_G_CTRL
+	#undef VIDIOC_G_CTRL
+	#define VIDIOC_G_CTRL _IOWR ('V', 27, struct v4l2_control_)
+#endif
+
+#ifdef VIDIOC_S_CTRL
+	#undef VIDIOC_S_CTRL
+	#define VIDIOC_S_CTRL _IOWR ('V', 28, struct v4l2_control_)
+#endif
+
+#ifdef __OLD_VIDIOC_
+#define VIDIOC_S_CTRL_OLD _IOW ('V', 28, struct v4l2_control_)
+#endif
+//modify struct end by Eric ----------------}}
 
 V4L2_Camera::V4L2_Camera():
 	cam_fd_(-1),
@@ -53,6 +80,45 @@ int V4L2_Camera::get_abs_exposure()
 
 int V4L2_Camera::set_abs_exposure(int exp_value)
 {
+	printf("\n========now play with ABS-EXPOSURE========\n");
+	struct v4l2_control ctrl;
+
+
+	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	int ret = ioctl(cam_fd_,VIDIOC_G_CTRL, &ctrl);
+	if(ret < 0)
+	{
+		printf("\tGet abs exposure fail with return is %d!\n",ret);
+	}
+	else
+	{
+		printf("\tGet abs exposure success with value is %d!\n",ctrl.value);
+	}
+
+	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ctrl.value = exp_value;
+	ret = ioctl(cam_fd_, VIDIOC_S_CTRL, &ctrl);
+	if(ret < 0)
+	{
+		printf("\tSet abs exposure fail with return is %d!\n",ret);
+	}
+	else
+	{
+		printf("\tSet abs exposure success to value  %d\n",ctrl.value);
+	}
+
+	ctrl.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+	ret = ioctl(cam_fd_,VIDIOC_G_CTRL, &ctrl);
+	if(ret < 0)
+	{
+		printf("\tAfter set,Get abs exposure fail with return is %d!\n",ret);
+	}
+	else
+	{
+		printf("\tAfter set,Get abs exposure success with exp is %d!\n",ctrl.value);
+	}
+
+	printf("========play with ABS-EXPOSURE end========\n\n");
 	return 0;
 }
 
@@ -187,6 +253,7 @@ int V4L2_Camera::get_pixel_format()
 
 int V4L2_Camera::set_pixel_format(int pix_fmt)
 {
+	printf("set_pixel_format\n");
 	int ret = -1;
 
 	//update pixle_format_
@@ -196,13 +263,13 @@ int V4L2_Camera::set_pixel_format(int pix_fmt)
 	ret = check_support_fmt_(pixle_format_);
 	if(ret != 0)
 	{
-		printf("Sorry,device doesn't support pixel format: ");
+		printf("\tSorry,device doesn't support pixel format: ");
 		char *teller = (char*)&pixle_format_;
 		for(int i = 0; i < 4; ++i)
 		{
-			printf("%c\n", teller[i]);
+			printf("%c", teller[i]);
 		}
-		printf("\n");
+		printf("\n\n\n");
 
 		return -1;
 	}
@@ -252,7 +319,7 @@ int V4L2_Camera::open_cam()
 	}
 	sleep(1);
 
-	ret = set_pixel_format(V4L2_PIX_FMT_YUYV);
+	ret = set_pixel_format(V4L2_PIX_FMT_NV21);
 	if(ret < 0)
 	{
 		printf("set_pixel_format fail with ret %d\n",ret);
@@ -315,6 +382,35 @@ int V4L2_Camera::open_cam_()
 	return 0;
 }
 
+int V4L2_Camera::get_input_()
+{
+	int ret = -1;
+
+	struct v4l2_input inp;
+	
+	ret = ioctl(cam_fd_, VIDIOC_G_INPUT, &inp);
+	if(-1 == ret)
+	{
+		printf("VIDIOC_G_INPUT error!\n");
+		ret = -1;
+	}
+	else
+	{
+		printf("VIDIOC_G_INPUT success!\n");
+		printf("\t inp.index is: %d!\n",inp.index);
+		printf("\t inp.name[32] is %s!\n",inp.name);
+		printf("\t inp.type is %d!\n",inp.type);
+		printf("\t inp.audioset is %d!\n",inp.audioset);
+		printf("\t inp.tuner is %d!\n",inp.tuner);
+		printf("\t inp.std is %d!\n",(int)inp.std);
+		printf("\t inp.status is %d!\n",inp.status);
+		//printf("\t inp.capabilities is %d!\n",inp.capabilities);
+		//
+		printf("\n\n");
+	}
+
+	return 0;
+}
 int V4L2_Camera::set_input_()
 {
 	int ret = -1;
@@ -331,7 +427,7 @@ int V4L2_Camera::set_input_()
 	else
 	{
 		printf("VIDIOC_S_INPUT success!\n");
-		printf("\t inp.index is %d:!\n",inp.index);
+		printf("\t inp.index is: %d!\n",inp.index);
 		printf("\t inp.name[32] is %s!\n",inp.name);
 		printf("\t inp.type is %d!\n",inp.type);
 		printf("\t inp.audioset is %d!\n",inp.audioset);
@@ -479,6 +575,7 @@ int V4L2_Camera::query_v4l2buffer_()
 		ret = 0;
 
 	}
+	printf("\n\n");
 
 	return ret;
 }

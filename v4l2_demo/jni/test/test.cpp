@@ -238,10 +238,25 @@ int test_get_rate()
 	cam.open_cam();
 
 	printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
-	//cam.get_frame_rate();
+	cam.get_frame_rate();
 
-	cam.get_support_frame_size();
+	//cam.get_support_frame_size();
 }
+
+int test_get_input()
+{
+	V4L2_Camera cam;
+	cam.open_cam();
+	cam.get_input_();
+}
+
+int test_set_abs_exp()
+{
+	V4L2_Camera cam;
+	cam.open_cam();
+	//cam.set_abs_exposure(853);
+}
+
 int main()
 {
 	//socket_server_tansfer_cam_frame();	
@@ -249,6 +264,9 @@ int main()
 	//test_get_v4l2_format();
 	//test_grab_frame();
 	
-	test_get_rate();
+	//test_get_rate();
+	//test_get_input();
+	
+	test_set_abs_exp();
 	return 0;
 }
