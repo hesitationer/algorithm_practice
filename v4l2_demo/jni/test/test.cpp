@@ -257,7 +257,19 @@ int test_set_abs_exp()
 	//cam.set_abs_exposure(853);
 }
 
-int main()
+static char key[32] = {};
+static char v1[256] = {};
+static char v2[256] = {};
+
+static char filter_key[32] = {};
+static char filter_v1[256] = {};
+static char filter_v2[256] = {};
+static char* op_filter[3] = {filter_key,filter_v1,filter_v2};
+
+int parse_options(char* filter_str);
+int store_options();
+
+int main(int argc, char** argv )
 {
 	//socket_server_tansfer_cam_frame();	
 	//test_cam();
@@ -267,6 +279,107 @@ int main()
 	//test_get_rate();
 	//test_get_input();
 	
-	test_set_abs_exp();
+	//test_set_abs_exp();
+
+	if(argc == 1)	
+	{
+		printf("no filter\n");
+	}
+	else if(argc == 2)
+	{
+		parse_options(argv[1]);
+		store_options();
+
+		for(int i = 0; i < 3; ++i)
+		{
+			printf("%s\n",op_filter[i]);
+		}
+	}
+	return 0;
+}
+
+int run_case()
+{
+	RUN_ERIC_CASE();
+	return 0;
+}
+
+int parse_options(char* filter_str)
+{
+
+	char *key_ptr = key;
+	char *temp = filter_str + 2;
+	char *value_1st = v1;
+	char *value_2nd = v2;
+
+
+	if(filter_str[0] == '-' && filter_str[1] == '-')
+	{
+		//get the key 
+		while(*temp != '=' && temp != NULL)
+		{
+			*key_ptr++ = *temp++;
+		}
+
+		printf("\nkey:%s\n",key);
+
+
+		//get the 1st part of value
+		temp++;//move to the key start
+		while(*temp != '.' && temp != NULL)
+		{
+			*value_1st++ = *temp++;
+		}
+
+		printf("\nvalue_1st:%s\n",v1);
+
+		//get the 2nd part of value
+		temp++;
+		while(*temp != 0)
+		{
+			*value_2nd++ = *temp++;
+		}
+
+		printf("value_2nd:%s\n",v2);
+
+	}
+	else
+	{
+		printf("invalid option: %s!\n",filter_str);
+	}
+
+
+	//reset pointer
+	key_ptr = NULL;
+	temp = NULL;
+	value_1st = NULL;
+	value_2nd = NULL;	
+
+	return 0;
+}
+
+
+int store_options()
+{
+	if(strcmp(key,"filter") == 0)
+	{
+		//copy
+		strncpy(filter_key,key,sizeof(key));
+		strncpy(filter_v1,v1,sizeof(v1));
+		strncpy(filter_v2,v2,sizeof(v2));
+
+		memset(key, 0, sizeof(key));
+		memset(v1, 0, sizeof(v1));
+		memset(v2, 0, sizeof(v2));
+
+	}
+	else if(strcmp(key,"repeat") == 0)
+	{
+	}
+	else
+	{
+		printf("invalid options:%s\n",key);
+	}
+
 	return 0;
 }
