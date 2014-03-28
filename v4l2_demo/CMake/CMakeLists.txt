@@ -1,0 +1,15 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+PROJECT(socket_client)
+SET(PROJECT_ROOT_PATH "../")
+SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_ROOT_PATH}/bin")
+SET(LIBRARY_OUTPUT_PATH "${PROJECT_ROOT_PATH}/pc_lib")
+
+INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/jni/include" "/usr/local/include")
+
+LINK_DIRECTORIES("/usr/local/lib/")
+
+FILE(GLOB  SRC_FILES "../jni/src/*.cpp" "../jni/test/test.cpp")
+ADD_EXECUTABLE(v4l2_camera_test ${SRC_FILES})
+
+

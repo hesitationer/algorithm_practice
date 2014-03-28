@@ -2,7 +2,7 @@
 #define V4L2_CAMERA_H
 
 #include <sys/time.h>
-#include <linux/videodev2.h>
+#include "linux/videodev2.h"
 
 const int V4L2_BUF_NUMBER = 4;
 
@@ -18,6 +18,10 @@ public:
 
 	int get_abs_exposure();
 	int set_abs_exposure(int exp_value);
+
+	int get_v4l2_format(v4l2_format *fmt);
+	int get_frame_rate();
+	int get_support_frame_size();
 
 	int grab_frame();
 	int retrieve_frame(char *&out_pixel_buffer);
@@ -51,6 +55,7 @@ private:
 	v4l2_mem_map_t map_mem_;
 
 	v4l2_buffer v4l2_buf_read_;
+	int v4l2_buf_index_;
 
 };
 #endif

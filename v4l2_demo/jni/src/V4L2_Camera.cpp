@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string.h>
 #include "V4L2_Camera.h"
 
 
@@ -12,15 +14,17 @@
 
 
 
+
 V4L2_Camera::V4L2_Camera():
-cam_fd_(-1),
-cam_name_(),
-exposure_value_(900),
-pixle_format_(V4L2_PIX_FMT_NV21),
-img_width_(640),
-img_height_(480),
-map_mem_(),
-v4l2_buf_read_()
+	cam_fd_(-1),
+	cam_name_(),
+	exposure_value_(900),
+	pixle_format_(V4L2_PIX_FMT_NV21),
+	img_width_(640),
+	img_height_(480),
+	map_mem_(),
+	v4l2_buf_read_(),
+	v4l2_buf_index_(0)
 {
 	snprintf(cam_name_, 255, "/dev/video0");
 }
@@ -52,8 +56,131 @@ int V4L2_Camera::set_abs_exposure(int exp_value)
 	return 0;
 }
 
+int V4L2_Camera::get_v4l2_format(v4l2_format *fmt)
+{
+	fmt->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	
+	int ret = ioctl(cam_fd_, VIDIOC_G_FMT, fmt);	
+	if(ret < 0)
+	{
+		printf("VIDIOC_G_FMT failed:%s\n",strerror(errno));
+	}
+
+	return ret;
+}
+
+int V4L2_Camera::get_support_frame_size()
+{
+	int ret;
+	struct v4l2_frmsizeenum fsize;
+
+	memset(&fsize, 0, sizeof(fsize));
+	fsize.index = 0;
+	fsize.pixel_format = pixle_format_;
+
+	while((ret = ioctl(cam_fd_, VIDIOC_ENUM_FRAMESIZES, &fsize)) == 0)
+	{
+		if(fsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+		{
+			printf("type is V4L2_FRMSIZE_TYPE_DISCRETE\n");
+		}
+		else if(fsize.type == V4L2_FRMSIZE_TYPE_CONTINUOUS)
+		{
+			printf("type is V4L2_FRMSIZE_TYPE_CONTINUOUS\n");
+		}
+		else if(fsize.type == V4L2_FRMSIZE_TYPE_STEPWISE)
+		{
+			printf("type is V4L2_FRMSIZE_TYPE_STEPWISE\n");
+		}
+		else
+		{
+			printf("no~no\n");
+		}	
+
+		fsize.index++;
+	}
+
+	if(ret !=0 && errno != EINVAL)
+	{
+		printf("ERROR enumerating frame size: %s\n",strerror(errno));
+	}
+
+	printf("index-ret:%d-%d\n",fsize.index,ret);
+	printf("frame size wxh: %dx%d\n",fsize.discrete.width,fsize.discrete.height);
+
+	return 0;
+}
+
+int V4L2_Camera::get_frame_rate()
+{
+	printf("get_frame_rate\n");
+
+	v4l2_frmivalenum frame_intervals;
+	memset(&frame_intervals, 0, sizeof(struct v4l2_frmivalenum));	
+
+	frame_intervals.index = 0;
+	frame_intervals.pixel_format = pixle_format_;
+	frame_intervals.width = img_width_;
+	frame_intervals.height = img_height_;
+
+	int ret = -1;
+	float interval = 0.0;
+	float frm_rate = 0.0;
+
+	while((ret = ioctl(cam_fd_, VIDIOC_ENUM_FRAMEINTERVALS, &frame_intervals)) == 0)
+	{
+
+		ret = ioctl(cam_fd_, VIDIOC_ENUM_FRAMEINTERVALS, &frame_intervals);
+
+		if(V4L2_FRMIVAL_TYPE_DISCRETE == frame_intervals.type) 
+		{
+			printf("type is V4L2_FRMIVAL_TYPE_DISCRETE\n");
+
+			printf("\tnumerator is %d, denominator is %d\n",
+					frame_intervals.discrete.numerator,
+					frame_intervals.discrete.denominator);
+
+			interval = (float)frame_intervals.discrete.numerator/frame_intervals.discrete.denominator;
+			frm_rate = 1./interval;
+
+			printf("\t%f---%f\n",interval, frm_rate);
+		}
+		else
+		{
+			if(V4L2_FRMIVAL_TYPE_CONTINUOUS == frame_intervals.type) 
+			{
+				printf("type is V4L2_FRMIVAL_TYPE_CONTINUOUS\n");
+			}
+			if(V4L2_FRMIVAL_TYPE_STEPWISE == frame_intervals.type) 
+			{
+				printf("type is V4L2_FRMIVAL_TYPE_STEPWISE\n");
+			}
+
+			float min_interval = frame_intervals.stepwise.min.numerator/frame_intervals.stepwise.min.denominator;
+			float max_interval = frame_intervals.stepwise.max.numerator/frame_intervals.stepwise.max.denominator;
+			float step_interval = frame_intervals.stepwise.step.numerator/frame_intervals.stepwise.step.denominator;
+
+			printf("min-max-step:%f-%f-%f",min_interval,max_interval,step_interval);
+		}
+
+
+		frame_intervals.index += 1;
+	}
+
+	return 0;
+}
+
 int V4L2_Camera::get_pixel_format()
 {
+	struct v4l2_format format;
+
+	get_v4l2_format(&format);
+
+	if(pixle_format_ != format.fmt.pix.pixelformat)
+	{
+		printf("Warning: pixle_format_ not same with the VIDIOC_G_FMT result!\n");
+		pixle_format_ = format.fmt.pix.pixelformat;
+	}
 
 	return pixle_format_;
 }
@@ -69,7 +196,14 @@ int V4L2_Camera::set_pixel_format(int pix_fmt)
 	ret = check_support_fmt_(pixle_format_);
 	if(ret != 0)
 	{
-		printf("Sorry,device doesn't support pixel format: %d\n", pixle_format_);
+		printf("Sorry,device doesn't support pixel format: ");
+		char *teller = (char*)&pixle_format_;
+		for(int i = 0; i < 4; ++i)
+		{
+			printf("%c\n", teller[i]);
+		}
+		printf("\n");
+
 		return -1;
 	}
 
@@ -112,25 +246,44 @@ int V4L2_Camera::open_cam()
 	}
 
 	ret = check_capability_();
-	printf("check_capability_\n");
+	if(ret < 0)
+	{
+		printf("check_capability_ failed with ret %d\n",ret);
+	}
 	sleep(1);
 
-	ret = set_pixel_format(pixle_format_);
+	ret = set_pixel_format(V4L2_PIX_FMT_YUYV);
+	if(ret < 0)
+	{
+		printf("set_pixel_format fail with ret %d\n",ret);
+	}
 	
 	ret = set_abs_exposure(exposure_value_);
-	printf("set_abs_exposure()\n");
+	if(ret < 0)
+	{
+		printf("set_abs_exposure fail with ret %d\n",ret);
+	}
 	sleep(1);
 
 	ret = request_v4l2buffers_();
-	printf("request_v4l2buffers_()\n");
+	if(ret < 0)
+	{
+		printf("request_v4l2buffers_ fail with ret %d\n",ret);
+	}
 	sleep(1);
 
 	ret = query_v4l2buffer_();
-	printf("query_v4l2buffer_()\n");
+	if(ret < 0)
+	{
+		printf("query_v4l2buffer_ fail with ret %d\n",ret);
+	}
 	sleep(1);
 
 	ret = start_streaming_();
-	printf("start_streaming_()\n");
+	if(ret < 0)
+	{
+		printf("start_streaming_ fail with ret %d\n",ret);
+	}
 	sleep(1);
 
 
@@ -186,6 +339,7 @@ int V4L2_Camera::set_input_()
 		printf("\t inp.std is %d!\n",(int)inp.std);
 		printf("\t inp.status is %d!\n",inp.status);
 		//printf("\t inp.capabilities is %d!\n",inp.capabilities);
+		printf("\n\n");
 	}
 
 	return ret;
@@ -219,6 +373,8 @@ int V4L2_Camera::check_capability_()
 
 int V4L2_Camera::check_support_fmt_(int format)
 {
+	printf("check_support_fmt_\n");
+
 	int ret = -1;
 
 	struct v4l2_fmtdesc fmtdesc;
@@ -230,8 +386,14 @@ int V4L2_Camera::check_support_fmt_(int format)
 		{
 			break;
 		}
-		printf("fmt id = %d, name = %s, v4l2pix_format = %d\n",
+		printf("\tfmt id = %d, name = %s, v4l2pix_format = %d--",
 				i, fmtdesc.description, fmtdesc.pixelformat);
+		char *teller = (char*)(&fmtdesc.pixelformat);
+		for(int i = 0; i < 4; ++i)
+		{
+			printf("%c",teller[i]);
+		}
+		printf("\n");
 
 		if (fmtdesc.pixelformat == format)
 		{
@@ -239,6 +401,7 @@ int V4L2_Camera::check_support_fmt_(int format)
 			break;
 		}
 	}
+	printf("\n\n");
 
 	return ret;
 }
@@ -265,6 +428,8 @@ int V4L2_Camera::request_v4l2buffers_()
 
 int V4L2_Camera::query_v4l2buffer_()
 {
+	printf("query_v4l2buffer_ and mmap\n");
+
 	int ret = 0;
 	struct v4l2_buffer buf;
 
@@ -289,9 +454,9 @@ int V4L2_Camera::query_v4l2buffer_()
                               cam_fd_,
                               buf.m.offset);
 		map_mem_.length = buf.length;
-		printf("index: %d, mem: %x, len: %d, offset: %d\n", 
+		printf("\t index: %d, mem: %x, len: %d, offset: %d\n", 
 				i, 
-				(int)map_mem_.mem[i],
+				*(int*)map_mem_.mem[i],
 			   	buf.length,
 			   	buf.m.offset);
 
@@ -338,23 +503,26 @@ int V4L2_Camera::grab_frame()
 	int ret = -1;
 	
 	//clear old
-	//v4l2_buf_read_.index= n_buf_index;
 	memset(&v4l2_buf_read_, 0, sizeof(v4l2_buf_read_));	
 	v4l2_buf_read_.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	v4l2_buf_read_.memory = V4L2_MEMORY_MMAP;
-	v4l2_buf_read_.index = 0;
 
 	do
 	{
 		ret = ioctl(cam_fd_, VIDIOC_DQBUF, &v4l2_buf_read_);	
 		if(ret < 0)
 		{
-			usleep(10*1000);
-			printf("VIDIOC_DQBUF failed with ret %d!\n",ret);
+			usleep(100*1000);
+			printf("grab_frame() VIDIOC_DQBUF failed with ret %d!\n",ret);
 		}
 	}while(-1 == ret);
 
-	//return ret;
+	printf("grab_frame() success with index is %d!\n",v4l2_buf_read_.index);
+
+	//record the buf index
+	v4l2_buf_index_ = v4l2_buf_read_.index;
+
+	return ret;
 }
 
 int V4L2_Camera::retrieve_frame(char *&out_pixel_buffer)
@@ -362,13 +530,16 @@ int V4L2_Camera::retrieve_frame(char *&out_pixel_buffer)
 	int ret = -1; 
 
 	//copy the frame
-	clock_t begin = clock();
-	memcpy(out_pixel_buffer,(char*)map_mem_.mem[0], map_mem_.length);
-	clock_t end = clock();
-	double elapsed_milli_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
-	printf("copy one frame done, and take %d [ms]\n",elapsed_milli_secs);
+	clock_t start, end;
+	start = clock();
+	memcpy(out_pixel_buffer,(char*)map_mem_.mem[v4l2_buf_index_], map_mem_.length);
+	end = clock();
+	printf("copy once, take %f [ms]\n",(end - start)*1000./CLOCKS_PER_SEC);
 
 	//Queue buffer again
+	v4l2_buf_read_.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	v4l2_buf_read_.memory = V4L2_MEMORY_MMAP;
+	v4l2_buf_read_.index= v4l2_buf_index_;
 	ret = ioctl(cam_fd_, VIDIOC_QBUF, &v4l2_buf_read_);
 	if(ret < 0)
 	{

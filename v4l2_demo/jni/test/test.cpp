@@ -1,6 +1,8 @@
 #include "V4L2_Camera.h"
 
 #include <stdio.h>
+#include <malloc.h>
+#include <string.h>
 
 #include <unistd.h>
 #include <sys/socket.h>
@@ -89,16 +91,16 @@ int socket_server_tansfer_cam_frame()
 
 	//========================
 	//cam part
-	V4L2_Camera *cam = new V4L2_Camera();
-	cam->open_cam();
-	//cam->set_abs_exposure(987);
+	V4L2_Camera cam;
+	cam.open_cam();
+	//cam.set_abs_exposure(987);
 
 	char *frame_buf = (char*)malloc(640*480*2*sizeof(char));
 
 	int a = 1000;
 	while(--a)
 	{
-		cam->query_frame(frame_buf);
+		cam.query_frame(frame_buf);
 		if(NULL == frame_buf)
 		{
 			printf("query_frame failed!\n");
@@ -170,13 +172,83 @@ int socket_server_tansfer_cam_frame()
 
 int test_cam()
 {
-	V4L2_Camera *cam = new V4L2_Camera();
-	cam->open_cam();
+	V4L2_Camera cam;
+	cam.open_cam();
+
 	return 0;
+}
+
+int test_get_v4l2_format()
+{
+	V4L2_Camera cam;
+	cam.set_pixel_format(V4L2_PIX_FMT_NV21);
+	cam.open_cam();
+
+	struct v4l2_format v4l2_fmt;
+	memset(&v4l2_fmt, 0, sizeof(v4l2_fmt));
+	int ret = cam.get_v4l2_format(&v4l2_fmt);
+	if(ret < 0)
+	{
+		printf("cam.get_v4l2_format() failed\n");
+		return ret;
+	}
+
+	printf("type: %d\n",v4l2_fmt.type);
+	printf("img width: %d\n",v4l2_fmt.fmt.pix.width);
+	printf("img height: %d\n",v4l2_fmt.fmt.pix.height);
+
+	printf("img pix format %d--: ",v4l2_fmt.fmt.pix.height);
+	int pix_fmt = v4l2_fmt.fmt.pix.pixelformat;
+	char* teller = (char*)(&pix_fmt); 
+	for(int i = 0; i < 4; ++i)
+	{
+		printf("%c",teller[i]);
+	}
+	printf("\n");
+
+	return 0;
+}
+
+int test_grab_frame()
+{
+	V4L2_Camera cam;
+	cam.open_cam();
+
+	char *frame_buf = (char*)malloc(800*600*3/2*sizeof(char));
+	cam.query_frame(frame_buf);
+
+	int count = 30;
+	while(--count)
+	{
+		int ret = cam.query_frame(frame_buf);
+		if(ret < 0)
+		{
+			printf("cam.query_frame() failed\n");
+			break;
+		}
+	}
+
+	return 0;
+
+}
+
+int test_get_rate()
+{
+	V4L2_Camera cam;
+	cam.open_cam();
+
+	printf("\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-\n");
+	//cam.get_frame_rate();
+
+	cam.get_support_frame_size();
 }
 int main()
 {
-	socket_server_tansfer_cam_frame();	
+	//socket_server_tansfer_cam_frame();	
 	//test_cam();
+	//test_get_v4l2_format();
+	//test_grab_frame();
+	
+	test_get_rate();
 	return 0;
 }
