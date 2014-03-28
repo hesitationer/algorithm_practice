@@ -1,12 +1,11 @@
-#include <string.h>
-#include <stdio.h>
+#include "pick_up_test_case.h"
+
 //store all case_name
-static int case_num = 0;
-static char all_case[256][64] = {0};
+int case_num = 0;
+char all_case[256][64] = {0};
 
 //store the function ptr
-typedef void (*test_fun)();
-static test_fun fun_ptr[256] = {0};
+test_fun fun_ptr[256] = {0};
 
 // Use assignment to run this function. tricky
 static int PUSH_CASE(char* unit_name, char* case_name, test_fun f_ptr)
@@ -18,67 +17,115 @@ static int PUSH_CASE(char* unit_name, char* case_name, test_fun f_ptr)
 
 	case_num++;
 
-	return 22;//whatever
+	return 0;//whatever
 } 
 
+static char key[32] = {};
+static char v1[256] = {};
+static char v2[256] = {};
 
-//#define PUSH_CASE push_case
-
-
-#define MAKE_NAME_IMPL(unit_name,case_name,idx) \
-	_##unit_name##_##case_name##_##idx
-
-#define MAKE_NAME(unit_name,case_name,idx) \
-	MAKE_NAME_IMPL(unit_name,case_name,idx)
-
-#define MAKE_FUNCTION(v1,v2) \
-	MAKE_NAME(v1,v2, __LINE__)
+static char filter_key[32] = {};
+static char filter_v1[256] = {};
+static char filter_v2[256] = {};
+static char* op_filter[3] = {filter_key,filter_v1,filter_v2};
 
 
-//generate the function
-#define ERIC_TEST(test_unit, test_case) \
-	static void MAKE_FUNCTION(test_unit, test_case)(void); \
-	static int MAKE_NAME(test_unit,test_case_,__LINE__ )= \
-	PUSH_CASE(#test_unit,#test_case,MAKE_FUNCTION(test_unit,test_case)); \
-	static void MAKE_FUNCTION(test_unit, test_case)(void) 
-
-
-ERIC_TEST(unit_01,case_01)
-{
-	printf("this is case 01\n");
-}
-
-ERIC_TEST(unit_02,case_02)
-{
-	printf("this is case 02\n");
-}
-
-ERIC_TEST(never,ever)
-{
-	printf("this is case never_ever\n");
-}
-
-int pick_case()
-{
-	//RUN_ERIC_CASE(unit_01,case_01);
-
-	printf("this is pick_case\n");
-	
-	return 0;
-}
-
-
-int main()
+int parse_options(char* filter_str)
 {
 
-	for(int i = 0; i < case_num; ++i)
+	char *key_ptr = key;
+	char *temp = filter_str + 2;
+	char *value_1st = v1;
+	char *value_2nd = v2;
+
+
+	if(filter_str[0] == '-' && filter_str[1] == '-')
 	{
-		printf("case_num:%d, %s\n\n",i,all_case[i]);
-		printf("---------------call:--------\n");
-		fun_ptr[i]();
-		printf("-----------call end:--------\n");
+		//get the key 
+		while(*temp != '=' && temp != NULL)
+		{
+			*key_ptr++ = *temp++;
+		}
+
+		printf("\nkey:%s\n",key);
+
+
+		//get the 1st part of value
+		temp++;//move to the key start
+		while(*temp != '.' && temp != NULL)
+		{
+			*value_1st++ = *temp++;
+		}
+
+		printf("\nvalue_1st:%s\n",v1);
+
+		//get the 2nd part of value
+		temp++;
+		while(*temp != 0)
+		{
+			*value_2nd++ = *temp++;
+		}
+
+		printf("value_2nd:%s\n",v2);
+
+	}
+	else
+	{
+		printf("invalid option: %s!\n",filter_str);
 	}
 
 
+	//reset pointer
+	key_ptr = NULL;
+	temp = NULL;
+	value_1st = NULL;
+	value_2nd = NULL;	
+
 	return 0;
 }
+
+
+int store_options()
+{
+	if(strcmp(key,"filter") == 0)
+	{
+		//copy
+		strncpy(filter_key,key,sizeof(key));
+		strncpy(filter_v1,v1,sizeof(v1));
+		strncpy(filter_v2,v2,sizeof(v2));
+
+		memset(key, 0, sizeof(key));
+		memset(v1, 0, sizeof(v1));
+		memset(v2, 0, sizeof(v2));
+
+	}
+	else if(strcmp(key,"repeat") == 0)
+	{
+	}
+	else
+	{
+		printf("invalid options:%s\n",key);
+	}
+
+	return 0;
+}
+
+int RUN_ERIC_CASE(int argc, char** argv) 
+{										
+	if(argc == 1)	  
+	{  
+		printf("no filtern");  
+	}  
+	else if(argc == 2)  
+	{  
+		parse_options(argv[1]);  
+		store_options();  
+  
+		for(int i = 0; i < 3; ++i)  
+		{  
+			printf("%sn",op_filter[i]);  
+		}  
+
+		//TODO: find the function-ptr by op_filter and run the case
+	}  
+}										
