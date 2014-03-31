@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 typedef void (*test_fun)();
-static int PUSH_CASE(char* unit_name, char* case_name, test_fun f_ptr);
+int PUSH_CASE(char* unit_name, char* case_name, test_fun f_ptr);
 
 #define MAKE_NAME_IMPL(unit_name,case_name,idx) \
 	_##unit_name##_##case_name##_##idx
@@ -24,6 +24,7 @@ static int PUSH_CASE(char* unit_name, char* case_name, test_fun f_ptr);
 int parse_options(char* filter_str);
 int store_options();
 
+int run_selected_case();
 int RUN_ERIC_CASE(int argc, char** argv);
 
 

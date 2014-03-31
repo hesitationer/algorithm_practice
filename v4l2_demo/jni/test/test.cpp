@@ -11,7 +11,7 @@
 
 #include <sys/poll.h>
 
-
+#include "pick_up_test_case.h"
 
 int socket_server_tansfer_cam_frame()
 {
@@ -243,14 +243,16 @@ int test_get_rate()
 	//cam.get_support_frame_size();
 }
 
-int test_get_input()
+//int test_get_input()
+ERIC_TEST(v4l2,test_get_input)
 {
 	V4L2_Camera cam;
 	cam.open_cam();
 	cam.get_input_();
 }
 
-int test_set_abs_exp()
+//int test_set_abs_exp()
+ERIC_TEST(v4l2, set_abs_exp)
 {
 	V4L2_Camera cam;
 	cam.open_cam();
@@ -270,26 +272,8 @@ int main(int argc, char** argv )
 	
 	//test_set_abs_exp();
 
-	if(argc == 1)	
-	{
-		printf("no filter\n");
-	}
-	else if(argc == 2)
-	{
-		parse_options(argv[1]);
-		store_options();
+	RUN_ERIC_CASE(argc,argv);
 
-		for(int i = 0; i < 3; ++i)
-		{
-			printf("%s\n",op_filter[i]);
-		}
-	}
-	return 0;
-}
-
-int run_case()
-{
-	RUN_ERIC_CASE();
 	return 0;
 }
 
