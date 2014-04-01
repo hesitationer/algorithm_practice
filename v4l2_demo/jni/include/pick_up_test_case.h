@@ -24,6 +24,18 @@ int PUSH_CASE(char* unit_name, char* case_name, test_fun f_ptr);
 int parse_options(char* filter_str);
 int store_options();
 
+// check if:
+// 1. strcmp(sub_string, target_string) == 0
+// 2. sub_string is part of target_string
+//
+// return: 
+// 	0  exactly equal
+// 	1  sub is part of target 
+// 	-1 not either
+int match_or_part_match(char *sub_string, char* target_string);
+// the KMP version of fuzzy-match
+int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string);
+
 int run_selected_case();
 int RUN_ERIC_CASE(int argc, char** argv);
 

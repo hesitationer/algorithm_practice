@@ -1,4 +1,5 @@
 #include "pick_up_test_case.h"
+#include "malloc.h"
 
 //store all case_name
 int case_num = 0;
@@ -107,6 +108,155 @@ int store_options()
 
 	return 0;
 }
+int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string)
+{
+	printf("\n======enter KMP====\n");
+	//input check
+	if(sub_string == NULL || target_string == NULL)
+	{
+		printf("sub_string or target_string is NULL!\n");
+		return -2;
+	}
+
+	int sub_len = strlen(sub_string);
+	int target_len = strlen(target_string);
+	if(sub_len > target_len)
+	{
+		printf("sub_len > target_len\n");
+		return -1;
+	}
+
+	//KMP
+
+	//KMP PART 1 ---Build the table
+	int *kmp_table = (int*)malloc(sub_len*sizeof(int));
+	kmp_table[0] = -1;
+	for(int i = 1; i < sub_len; ++i)
+	{
+		if(sub_string[i] != sub_string[0])//not found the repeat first 
+		{
+			kmp_table[i] = 0;
+			continue;
+		}
+
+
+		int matched_before_cur = 0;
+		const char *p1 = sub_string;
+		const char *p2 = sub_string + i;
+
+		while(*p1++ == *p2++)//repeat the start
+		{
+			kmp_table[i++] = matched_before_cur;
+			matched_before_cur++;
+		}
+
+		kmp_table[i] = matched_before_cur;
+
+		//reset
+		matched_before_cur = 0;
+	}
+
+
+	//KMP Part 2 ---Start the Search
+	int m = 0; //cur pos in target_string
+	int i = 0;	//cur pos in sub_string 
+
+	int ret = -1;//suppose neither equal nor part at start
+	while(m + i < target_len)
+	{
+		if(target_string[m + i] == sub_string[i])
+		{
+			if(i == sub_len - 1)//get to the end of sub_string
+			{
+				ret = 1;
+				break;
+			}
+
+			i++;
+		}
+		else
+		{
+			//update m and i
+			m = m + i - kmp_table[i]; 
+			if(kmp_table[i] == -1)//the first time
+			{
+				i = 0;
+			}
+			else
+			{
+				i = kmp_table[i];
+			}
+		}
+	}
+
+	return ret;
+}
+
+int match_or_part_match(char *sub_string, char* target_string)
+{
+	//input check
+	if(sub_string == NULL || target_string == NULL)
+	{
+		printf("sub_string or target_string is NULL!\n");
+		return -2;
+	}
+
+	int sub_len = strlen(sub_string);
+	int target_len = strlen(target_string);
+
+	int ret = strcmp(sub_string, target_string);
+	if(ret == 0)
+	{
+		return 0;
+	}
+	else if(sub_len >= target_len)//no chance to be part
+	{
+		return -1;
+	}
+	else
+	{
+		//check if A is part B
+		//char *p1 = sub_string;
+		//char *p2 = target_string;
+
+		// suppose:
+		// strlen(A) is 2
+		// strlen(B) is 3
+		// the valide range is [0, 3-2] 
+		for(int i = 0; i <= target_len - sub_len; ++i)
+		{
+			if(target_string[i] != sub_string[0])
+			{
+				continue;
+			}
+
+
+			//compare from target_string[i]
+			char *p1 = sub_string;
+			char *p2 = target_string + i;
+			while(*p1 != 0)//till the end of sub_string
+			{
+				if(*p1 == *p2)
+				{
+					p1++;
+					p2++;
+				}
+				else
+				{
+					break;
+				}
+			}//end while(*p1 != 0)
+
+			if(*p1 == 0)
+			{
+				return 1;
+			}
+		}// end for(i = 0; i < target_len - sub_len; ++i)
+
+		return -1;
+
+	}// end for else
+}
 
 int run_selected_case()
 {
@@ -114,7 +264,7 @@ int run_selected_case()
 	//find index of case in all_case[][]
 	for(int i = 0; i < case_num; ++i)
 	{
-		if(strcmp(all_case[i], filter_v2) == 0)
+		if(match_or_part_match_KMP_v1(filter_v2, all_case[i]) >= 0)
 		{
 			case_index = i;
 			break;
