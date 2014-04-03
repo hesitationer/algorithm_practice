@@ -111,6 +111,9 @@ int store_options()
 int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string)
 {
 	printf("\n======enter KMP====\n");
+	printf("sub: %s\n",sub_string);
+	printf("target: %s\n",target_string);
+
 	//input check
 	if(sub_string == NULL || target_string == NULL)
 	{
@@ -265,7 +268,9 @@ int run_selected_case()
 	for(int i = 0; i < case_num; ++i)
 	{
 		if(match_or_part_match_KMP_v1(filter_v2, all_case[i]) >= 0)
+		//if(match_or_part_match(filter_v2, all_case[i]) >= 0)
 		{
+			printf("\nselect case: %s--%s\n",filter_v2,all_case[i]);
 			case_index = i;
 			break;
 		}

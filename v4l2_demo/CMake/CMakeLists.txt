@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/jni/include" "/usr/local/include")
 
 LINK_DIRECTORIES("/usr/local/lib/")
 
-FILE(GLOB  SRC_FILES "../jni/src/*.cpp" "../jni/test/test.cpp")
+FILE(GLOB  SRC_FILES "../jni/src/*.cpp" "../jni/test/*.cpp")
 ADD_EXECUTABLE(v4l2_camera_test ${SRC_FILES})
 
 

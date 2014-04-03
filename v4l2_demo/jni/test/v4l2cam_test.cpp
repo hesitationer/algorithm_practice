@@ -178,7 +178,8 @@ int test_cam()
 	return 0;
 }
 
-int test_get_v4l2_format()
+//int test_get_v4l2_format()
+ERIC_TEST(v4l2, check_fmt)
 {
 	V4L2_Camera cam;
 	cam.set_pixel_format(V4L2_PIX_FMT_NV21);
@@ -190,7 +191,7 @@ int test_get_v4l2_format()
 	if(ret < 0)
 	{
 		printf("cam.get_v4l2_format() failed\n");
-		return ret;
+		return ;
 	}
 
 	printf("type: %d\n",v4l2_fmt.type);
@@ -205,31 +206,26 @@ int test_get_v4l2_format()
 		printf("%c",teller[i]);
 	}
 	printf("\n");
-
-	return 0;
 }
 
-int test_grab_frame()
+
+//int test_grab_frame()
+ERIC_TEST(v4l2,get_one_frame)
 {
 	V4L2_Camera cam;
 	cam.open_cam();
 
-	char *frame_buf = (char*)malloc(800*600*3/2*sizeof(char));
+	char *frame_buf = (char*)malloc(640*480*3/2*sizeof(char));
 	cam.query_frame(frame_buf);
 
-	int count = 30;
-	while(--count)
-	{
-		int ret = cam.query_frame(frame_buf);
-		if(ret < 0)
-		{
-			printf("cam.query_frame() failed\n");
-			break;
-		}
-	}
-
-	return 0;
-
+    printf("after query_frame\n");
+    FILE *fd = fopen("/data/eric/raw.bin","wb");
+    if(fd == NULL)
+    {
+        printf("open file failed\n");
+    }
+    fwrite(frame_buf, 640*480*3/2, 1, fd);
+    fclose(fd);
 }
 
 int test_get_rate()
@@ -259,21 +255,4 @@ ERIC_TEST(v4l2, set_abs_exp)
 	//cam.set_abs_exposure(853);
 }
 
-
-int main(int argc, char** argv )
-{
-	//socket_server_tansfer_cam_frame();	
-	//test_cam();
-	//test_get_v4l2_format();
-	//test_grab_frame();
-	
-	//test_get_rate();
-	//test_get_input();
-	
-	//test_set_abs_exp();
-
-	RUN_ERIC_CASE(argc,argv);
-
-	return 0;
-}
 
