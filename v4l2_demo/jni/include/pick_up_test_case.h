@@ -36,6 +36,10 @@ int match_or_part_match(char *sub_string, char* target_string);
 // the KMP version of fuzzy-match
 int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string);
 
+
+int build_kmp_table_my(const char* w, int* table, int len);
+int build_kmp_table_wiki(const char* w, int* table, int len);
+
 int run_selected_case();
 int RUN_ERIC_CASE(int argc, char** argv);
 

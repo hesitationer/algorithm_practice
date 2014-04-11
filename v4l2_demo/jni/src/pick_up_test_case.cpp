@@ -108,6 +108,70 @@ int store_options()
 
 	return 0;
 }
+
+int build_kmp_table_my(const char* w, int* table, int len)
+{
+	if(w == NULL)
+	{
+		printf("w == NULL!\n");
+		return -1;
+	}
+
+	table[0] = -1;
+	for(int i = 1; i < len; ++i)
+	{
+		if(w[i] != w[0])
+		{
+			table[i] = 0;
+			continue;
+		}
+
+		int matched_before_cur = 0;
+		const char *p1 = w;
+		const char *p2 = w + i;
+		while(*p1++ == *p2++)
+		{
+			table[i++] = matched_before_cur;
+			matched_before_cur++;
+		}
+
+		table[i] = matched_before_cur;
+	}
+
+	return 0;
+}
+
+int build_kmp_table_wiki(const char* w, int* table, int len)
+{
+	if(w == NULL || table == NULL)
+	{
+		printf("w == NULL || table == NULL\n");
+		return -1;
+	}
+
+	table[0] = -1; table[1] = 0;
+	int pos = 2,cnd = 0;
+
+	while(pos < len)
+	{
+		if(w[pos - 1] == w[cnd])
+		{
+			cnd++;
+			table[pos] = cnd;
+			pos++;
+		}	
+		else if(cnd > 0)
+		{
+			cnd = table[cnd];
+		}
+		else
+		{
+			table[pos] = 0;
+			pos++;
+		}
+	}
+}
+
 int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string)
 {
 	printf("\n======enter KMP====\n");
@@ -133,31 +197,7 @@ int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string
 
 	//KMP PART 1 ---Build the table
 	int *kmp_table = (int*)malloc(sub_len*sizeof(int));
-	kmp_table[0] = -1;
-	for(int i = 1; i < sub_len; ++i)
-	{
-		if(sub_string[i] != sub_string[0])//not found the repeat first 
-		{
-			kmp_table[i] = 0;
-			continue;
-		}
-
-
-		int matched_before_cur = 0;
-		const char *p1 = sub_string;
-		const char *p2 = sub_string + i;
-
-		while(*p1++ == *p2++)//repeat the start
-		{
-			kmp_table[i++] = matched_before_cur;
-			matched_before_cur++;
-		}
-
-		kmp_table[i] = matched_before_cur;
-
-		//reset
-		matched_before_cur = 0;
-	}
+	build_kmp_table_wiki(sub_string,kmp_table,sub_len);
 
 
 	//KMP Part 2 ---Start the Search
