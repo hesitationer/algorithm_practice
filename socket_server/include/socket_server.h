@@ -12,12 +12,17 @@ public:
 	~SocketServer();
 
 	int Start();
+	static int Stop();
+
+private:
+	int process_data_(char *&data_received);
 
 private:
 	CSocket *socket_;
 	struct pollfd ufds_[max_clients + 1];
+	int cur_place;
 
 	int listen_fd;
-	bool end_server;
+	static bool end_server;
 };
 #endif
