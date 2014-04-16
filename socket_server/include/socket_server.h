@@ -17,6 +17,8 @@ public:
 private:
 	int process_data_(char *&data_received);
 
+	int show_io_speed();
+
 private:
 	CSocket *socket_;
 	struct pollfd ufds_[max_clients + 1];
@@ -24,5 +26,10 @@ private:
 
 	int listen_fd;
 	static bool end_server;
+
+	double data_received_;
+	double time_elapsed_;//in seconds
+	clock_t start_;
+
 };
 #endif

@@ -1,3 +1,4 @@
+#include <time.h>
 #include <unistd.h>
 #include "socket_server.h"
 
@@ -6,7 +7,9 @@ bool SocketServer::end_server = false;
 SocketServer::SocketServer():
 	socket_(NULL),
 	cur_place(0),
-	listen_fd(-1)
+	listen_fd(-1),
+	data_received_(0.0),
+	time_elapsed_(0.0)
 {
 	socket_ = new CSocket();
 }
@@ -33,12 +36,14 @@ int SocketServer::Start()
 	}
 
 	int buf_size = 640*480*2;
+	char res_buf[32] = {0};
 	char recv_buf[640*480*2] = {0};
 
 	int rv = 0;
+	start_ = clock();
 	while(!end_server)
 	{
-		rv = poll(ufds_,5,500);
+		rv = poll(ufds_,1024,10);
 
 		if(rv < 0)
 		{
@@ -77,6 +82,8 @@ int SocketServer::Start()
 
 				ufds_[cur_place].fd = new_fd;
 				ufds_[cur_place].events = POLLIN;
+				printf("ufds_[j]: j-fd----%d,%d\n",cur_place,new_fd);
+
 				cur_place += 1;
 
 				//echo the client info for debug
@@ -84,7 +91,6 @@ int SocketServer::Start()
 			else
 			{
 				//receive data from client
-				printf("ufds_[j]: j-fd----%d,%d\n",j,ufds_[j].fd);
 				int ret = socket_->RecvRawData(ufds_[j].fd,recv_buf, buf_size);
 				if(ret < 0)
 				{
@@ -94,12 +100,34 @@ int SocketServer::Start()
 					continue;//don't send to process_data_()
 				}
 
+				show_io_speed();
 				char *temp = (char*)recv_buf;
-				process_data_(temp);
+				if(0 == process_data_(temp))
+				{
+					ret = socket_->SendRawData(ufds_[j].fd, res_buf, 32);
+					if(ret < 0)
+					{
+						printf("SendRawData fail with ret %d\n",ret);
+					}
+				}
+
 			}
 		}
 	}//while(end_server)
 
+
+	return 0;
+}
+
+int SocketServer::show_io_speed()
+{
+	data_received_ += 614.4;//640*480*2 = 614400
+
+	clock_t end = clock();
+	time_elapsed_ += (double)(end - start_)/CLOCKS_PER_SEC;
+	start_ = end;
+	double speed = (double)data_received_/time_elapsed_;
+	printf("I/O speed is %f/%f =  %f KB/S\n",data_received_, time_elapsed_, speed);
 
 	return 0;
 }
@@ -115,6 +143,7 @@ int SocketServer::process_data_(char *&data_received)
 {
 	int am_time_per_frame = 10*1000;
 	usleep(am_time_per_frame);
+
 
 	return 0;
 }
