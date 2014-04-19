@@ -124,7 +124,7 @@ int SocketServer::show_io_speed()
 	data_received_ += 614.4;//640*480*2 = 614400
 
 	clock_t end = clock();
-	time_elapsed_ += (double)(end - start_)/CLOCKS_PER_SEC;
+	time_elapsed_ += (double)((double)end - (double)start_)/CLOCKS_PER_SEC;
 	start_ = end;
 	double speed = (double)data_received_/time_elapsed_;
 	printf("I/O speed is %f/%f =  %f KB/S\n",data_received_, time_elapsed_, speed);
@@ -146,4 +146,36 @@ int SocketServer::process_data_(char *&data_received)
 
 
 	return 0;
+}
+
+void* SocketServer::process_data_routine_(void* arg)
+{
+	//receive and process until the client hung-up
+	//bool  client_hung_up = false;
+	//while(!client_hung_up)
+	//{
+	//	//receive data from client
+	//	int ret = socket_->RecvRawData(ufds_[j].fd,recv_buf, buf_size);
+	//	if(ret < 0)
+	//	{
+	//		printf("RecvRawData return %d, so forget client %d\n",ret,ufds_[j].fd);
+	//		ufds_[j].fd = -1;
+	//		ufds_[j].events = -1;
+	//		break;//this thread will ends
+	//	}
+
+	//	show_io_speed();
+	//	char *temp = (char*)recv_buf;
+	//	if(0 == process_data_(temp))
+	//	{
+	//		ret = socket_->SendRawData(ufds_[j].fd, res_buf, 32);
+	//		if(ret < 0)
+	//		{
+	//			printf("SendRawData fail with ret %d\n",ret);
+	//			break;
+	//		}
+	//	}
+	//}
+
+	//printf("thread %d ends\n",);
 }

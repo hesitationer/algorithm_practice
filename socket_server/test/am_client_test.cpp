@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	static int i = 0;
 	while(!g_stop)
 	{
-		for(; i < 2; ++i) 
+		for(; i < 100; ++i) 
 		{
 			pthread_create(thread_array + i, NULL, thread_routine, thread_array + i);
 			sleep(1);

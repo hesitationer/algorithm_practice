@@ -19,6 +19,8 @@ private:
 
 	int show_io_speed();
 
+	static void* process_data_routine_(void *arg);
+
 private:
 	CSocket *socket_;
 	struct pollfd ufds_[max_clients + 1];

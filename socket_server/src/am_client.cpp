@@ -94,22 +94,16 @@ int AM_Client::Stop()
 
 int AM_Client::show_recv_interval_()
 {
-	pthread_mutex_lock(&mutex);
+	//pthread_mutex_lock(&mutex);
 	printf("%u times:\n",visit_times++);
 
-
 	clock_t now = clock();
-	printf("\tthread %u: now: %u\n",thread_id_,now);
-	printf("\tthread %u: prev_clock_: %u\n",thread_id_,prev_clock_);
 	double t = (double)(now - prev_clock_)*1000./CLOCKS_PER_SEC;
-	printf("\tthread %u: elapse: %u  %u  %f [ms]\n",thread_id_,now,prev_clock_,t);
-	
 	printf("\tthread %u: now:prev_clock_:t  %u:%u:%g [ms]\n\n",thread_id_,now,prev_clock_,t);
 
 	prev_clock_ = now;
 
-
-	pthread_mutex_unlock(&mutex);
+	//pthread_mutex_unlock(&mutex);
 
 	return 0;
 }
