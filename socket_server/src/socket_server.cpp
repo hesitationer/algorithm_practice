@@ -1,5 +1,6 @@
 #include <time.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "socket_server.h"
 
 
@@ -35,9 +36,9 @@ int SocketServer::Start()
 		ufds_[i].events = -1;
 	}
 
-	int buf_size = 640*480*2;
-	char res_buf[32] = {0};
-	char recv_buf[640*480*2] = {0};
+	//int buf_size = 640*480*2;
+	//char res_buf[32] = {0};
+	//char recv_buf[640*480*2] = {0};
 
 	int rv = 0;
 	start_ = clock();
@@ -80,36 +81,17 @@ int SocketServer::Start()
 				//accept new client
 				int new_fd = socket_->AcceptNewConnection();
 
-				ufds_[cur_place].fd = new_fd;
-				ufds_[cur_place].events = POLLIN;
-				printf("ufds_[j]: j-fd----%d,%d\n",cur_place,new_fd);
-
-				cur_place += 1;
-
-				//echo the client info for debug
+				routine_para_t para;//NOTE: this struct has no memory need to handle
+				para.server_running = this;
+				para.fd = new_fd;
+				para.thread_id = (unsigned int*)thread_id_array + cur_place;
+				//create new thread
+				pthread_create(thread_id_array + cur_place, NULL,
+						process_data_routine_,(void*)&para);
+				cur_place++;//thread number
 			}
 			else
 			{
-				//receive data from client
-				int ret = socket_->RecvRawData(ufds_[j].fd,recv_buf, buf_size);
-				if(ret < 0)
-				{
-					printf("RecvRawData return %d, so forget client %d\n",ret,ufds_[j].fd);
-					ufds_[j].fd = -1;
-					ufds_[j].events = -1;
-					continue;//don't send to process_data_()
-				}
-
-				show_io_speed();
-				char *temp = (char*)recv_buf;
-				if(0 == process_data_(temp))
-				{
-					ret = socket_->SendRawData(ufds_[j].fd, res_buf, 32);
-					if(ret < 0)
-					{
-						printf("SendRawData fail with ret %d\n",ret);
-					}
-				}
 
 			}
 		}
@@ -150,32 +132,42 @@ int SocketServer::process_data_(char *&data_received)
 
 void* SocketServer::process_data_routine_(void* arg)
 {
+	int buf_size = 640*480*2;
+	char res_buf[32] = {0};
+	char recv_buf[640*480*2] = {0};
+
+	routine_para_t *para = (routine_para_t*)(arg);
+	SocketServer* server_this = para->server_running;
+	CSocket *socket_ = server_this->socket_;
+	int client_fd = para->fd;
+	unsigned int *thread_id = para->thread_id;
+
 	//receive and process until the client hung-up
-	//bool  client_hung_up = false;
-	//while(!client_hung_up)
-	//{
-	//	//receive data from client
-	//	int ret = socket_->RecvRawData(ufds_[j].fd,recv_buf, buf_size);
-	//	if(ret < 0)
-	//	{
-	//		printf("RecvRawData return %d, so forget client %d\n",ret,ufds_[j].fd);
-	//		ufds_[j].fd = -1;
-	//		ufds_[j].events = -1;
-	//		break;//this thread will ends
-	//	}
+	bool  client_hung_up = false;
+	while(!client_hung_up)
+	{
+		//receive data from client
+		int ret = socket_->RecvRawData(client_fd,recv_buf, buf_size);
+		if(ret < 0)
+		{
+			printf("RecvRawData return %d, so forget client %d\n",ret,client_fd);
+			break;//this thread will ends
+		}
 
-	//	show_io_speed();
-	//	char *temp = (char*)recv_buf;
-	//	if(0 == process_data_(temp))
-	//	{
-	//		ret = socket_->SendRawData(ufds_[j].fd, res_buf, 32);
-	//		if(ret < 0)
-	//		{
-	//			printf("SendRawData fail with ret %d\n",ret);
-	//			break;
-	//		}
-	//	}
-	//}
+		server_this->show_io_speed();
+		char *temp = (char*)recv_buf;
+		if(0 == server_this->process_data_(temp))
+		{
+			ret = socket_->SendRawData(client_fd, res_buf, 32);
+			if(ret < 0)
+			{
+				printf("SendRawData fail with ret %d\n",ret);
+				break;
+			}
+		}
+	}
 
-	//printf("thread %d ends\n",);
+	printf("thread %u ends\n",*thread_id);
+
+	return NULL;
 }

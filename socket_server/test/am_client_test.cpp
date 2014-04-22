@@ -15,8 +15,8 @@ void stop_all_connections(int arg)
 
 void* thread_routine(void *arg)
 {
-	printf("thread_id from pthread_create:%u\n",*(long*)arg);
-	printf("thread_id from pthread_self():%u\n",pthread_self());
+	printf("thread_id from pthread_create:%lu\n",*(long*)arg);
+	printf("thread_id from pthread_self():%lu\n",pthread_self());
 	//printf("thread_id from getid():%d\n",gettid());//can't find gettid() in //Fedora20
 
 	AM_Client client;
@@ -24,6 +24,8 @@ void* thread_routine(void *arg)
 	client.SetServerIP("127.0.0.1");
 	client.SetServerPort("51767");
 	client.Start();
+
+	return NULL;
 }
 
 int help()

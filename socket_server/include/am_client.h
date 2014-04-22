@@ -35,7 +35,7 @@ private:
 	struct pollfd ufds_[1];
 	clock_t prev_clock_;
 
-	pthread_mutex_t  mutex;//
+	static pthread_mutex_t  mutex;//
 
 	pthread_t thread_id_;
 	

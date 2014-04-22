@@ -3,6 +3,7 @@
 #include "am_client.h"
 
 bool AM_Client::running = true;
+pthread_mutex_t AM_Client::mutex = PTHREAD_MUTEX_INITIALIZER;
 
 AM_Client::AM_Client():
 	socket_(NULL),
@@ -15,16 +16,12 @@ AM_Client::AM_Client():
 	socket_ = new CSocket();
 
 	memset(ufds_, 0, sizeof(pollfd));
-
-
-
-	mutex = PTHREAD_MUTEX_INITIALIZER;
 }
 
 AM_Client::~AM_Client()
 {
 	delete socket_;
-	pthread_mutex_destroy(&mutex);
+	pthread_mutex_destroy(&AM_Client::mutex);
 }
 
 int AM_Client::Start()
@@ -57,6 +54,8 @@ int AM_Client::Start()
 	}
 
 	printf("exit start with fd:%d\n",conn_fd);
+
+	return 0;
 }
 
 int AM_Client::SetServerIP(const char* server_ip)
@@ -99,7 +98,7 @@ int AM_Client::show_recv_interval_()
 
 	clock_t now = clock();
 	double t = (double)(now - prev_clock_)*1000./CLOCKS_PER_SEC;
-	printf("\tthread %u: now:prev_clock_:t  %u:%u:%g [ms]\n\n",thread_id_,now,prev_clock_,t);
+	printf("\tthread %lu: now:prev_clock_:t  %ld:%ld:%g [ms]\n\n",thread_id_,now,prev_clock_,t);
 
 	prev_clock_ = now;
 
@@ -137,4 +136,6 @@ int AM_Client::check_process_result_()
 int AM_Client::SetThreadID(pthread_t t_id)
 {
 	thread_id_ = t_id;
+
+	return 0;
 }

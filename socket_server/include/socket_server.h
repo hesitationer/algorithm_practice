@@ -33,5 +33,13 @@ private:
 	double time_elapsed_;//in seconds
 	clock_t start_;
 
+	typedef struct{
+		SocketServer* server_running;
+		//CSocket *socket_;
+		int fd;
+		unsigned int *thread_id;
+	}routine_para_t;
+
+	pthread_t thread_id_array[max_clients + 1];
 };
 #endif
