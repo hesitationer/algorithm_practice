@@ -1,6 +1,9 @@
-#include "pick_up_test_case.h"
 #include "malloc.h"
 
+#include "pick_up_test_case.h"
+
+extern "C"
+{
 //store all case_name
 int case_num = 0;
 char all_case[256][64] = {0};
@@ -170,6 +173,8 @@ int build_kmp_table_wiki(const char* w, int* table, int len)
 			pos++;
 		}
 	}
+
+	return 0;
 }
 
 int match_or_part_match_KMP_v1(const char* sub_string, const char* target_string)
@@ -324,6 +329,8 @@ int run_selected_case()
 
 	//call fun_ptr by index from fun_ptr[]
 	fun_ptr[case_index]();
+
+	return 0;
 }
 
 int RUN_ERIC_CASE(int argc, char** argv) 
@@ -347,4 +354,8 @@ int RUN_ERIC_CASE(int argc, char** argv)
 		//TODO: find the function-ptr by op_filter and run the case
 		run_selected_case();
 	}  
+
+	return 0;
 }										
+
+}//end extern "C"
