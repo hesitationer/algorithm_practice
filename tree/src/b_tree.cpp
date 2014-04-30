@@ -85,7 +85,7 @@ int b_tree::insert_to_(eric_node* node, int value)
 	}
 	else
 	{
-		if(value > root->value)//go right
+		if(value > node->value)//go right
 		{
 			insert_to_(node->r_child, value);
 		}
@@ -263,32 +263,36 @@ int b_tree::print_breadth_first()
 int b_tree::print_and_format(int item_num,int item_value)
 {
 	static int depth = get_depth_();
-	static int width = 5;
-	static int interval = 2;
+	static int width = 4;
+	static int interval = 4;
 	static int max = 2 << (depth - 1);//max number in one line, e.g. last line
 	static int last_line_width = max*width + (max - 1)*interval;
 	static int fix_indent = (int)(line_length - last_line_width)/2;
-
 	static int cur_depth = 1;
-	if((item_num + 1) == (1 << cur_depth))//1, 3, 5... last item of per line
-	{
-		//printf("item_num:%d",item_num);
-		cur_depth++;
 
-		int cur_line_item = (1 << depth) - 1;
-		int cur_used_width = cur_line_item*width  + (cur_line_item - 1)*interval;
-		int cur_line_indent = fix_indent + (last_line_width - cur_used_width)/2;
-		for(int i = 0; i < cur_line_indent; ++i){
+	if(item_num == 1)//first number
+	{
+		for(int i = 0; i < fix_indent; ++i){//printf the fix indent
 			printf(" ");
 		}
 	}
-	printf("%5d",item_value);
-	printf("  ");//the 2-space interval
 
-	if((item_num + 1) == (1 << (cur_depth - 1)))//1, 3, 5... last item of per line
+	int need_width = (1 << (depth + 1 - cur_depth)) - 1;
+	printf("%*d", need_width,item_value);//print the number
+	printf("    ");//the interval
+
+	if((item_num + 1) == (1 << cur_depth))//1, 3, 5... last item of per line
 	{
-		printf("\n");
+		cur_depth++;
+
+		printf("\n");//change to next line
+
+		//int cur_line_item = (1 << depth) - 1;
+		for(int i = 0; i < fix_indent; ++i){//printf the fix indent
+			printf(" ");
+		}
 	}
+
 
 	return 0;
 }
