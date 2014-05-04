@@ -27,7 +27,7 @@ public:
 	b_tree();
 	~b_tree();
 
-	int insert(int value);
+	eric_node* insert(int value);
 	int remove();
 	int find();
 	int reset();
@@ -38,14 +38,19 @@ public:
 
 	int print_breadth_first();
 
-	int get_depth_();
+	// height of left-subtree subs height of right-subtree
+	int get_balance_factor(eric_node* node);
+	int get_max_depth_(eric_node* node);
+	int get_node_depth_(eric_node* node);
 
+
+	eric_node* get_root();
 private:
 	eric_node* root;
 
 	eric_node* make_node_(int value, node_type type);
 
-	int insert_to_(eric_node* node, int value);
+	eric_node* insert_to_(eric_node* node, int value);
 
 
 	int destroy_tree_();
@@ -59,7 +64,8 @@ private:
 	int root_indent;
 	int get_indent_(eric_node* node);
 
-	int print_and_format(int item_num, int item_value);
+	static int s_depth;// used by get_max_depth_()
+	static int s_max_depth;// used by get_max_depth_()
 
 
 	int line_length;//assume the terminal length per line

@@ -22,6 +22,9 @@ char line_indent[6] = {40,32,24,16,8,0};
 
 #pragma GCC diagnostic pop
 
+int b_tree::s_depth = 1;
+int b_tree::s_max_depth = 1;
+
 using namespace std;
 
 b_tree::b_tree():
@@ -39,49 +42,55 @@ b_tree::~b_tree()
 	destroy_tree_();
 }
 
-int b_tree::insert(int value)
+eric_node* b_tree::insert(int value)
 {
-	insert_to_(root,value);
+	eric_node* new_node = NULL;
+	new_node = insert_to_(root,value);
+	if(new_node == NULL){
+		printf("insert %d error\n",value);
+	}
+
+	//TODO: check and keep banlance
 
 	total_node++;
 
-	return 0;
+	return new_node;
 }
 
 
-int b_tree::insert_to_(eric_node* node, int value)
+eric_node* b_tree::insert_to_(eric_node* node, int value)
 {
+	// NOTE the static key-word !!
+	// It's neccessary to keep(hold to not change) the new_node value when 
+	// return from the call in which insert operation happened
+	static eric_node* new_node = NULL;
+
 	//root is null
 	if(tree_is_empty_())
 	{
 		root->value = value;
-		return 0;
+		return root;
 	}
 
 	//cur node is null
 	if(node->l_child == NULL && value <= node->value)
 	{
 		//node->value = value;
-		eric_node* temp = make_node_(value, L_NODE);
-		node->l_child = temp;//parent --> child
-		temp->parent = node; //child  --> parent
+		new_node = make_node_(value, L_NODE);
+		node->l_child = new_node;//parent --> child
+		new_node->parent = node; //child  --> parent
 
-		//reset
-		temp = NULL;
 
-		return 0;
+		return new_node;// this will causes return from recusively
 	}
 	else if(node->r_child == NULL && value > node->value)
 	{
 		//node->value = value;
-		eric_node* temp = make_node_(value,R_NODE);
-		node->r_child = temp;//parent --> child
-		temp->parent = node; //child  --> parent
+		new_node = make_node_(value,R_NODE);
+		node->r_child = new_node;//parent --> child
+		new_node->parent = node; //child  --> parent
 
-		//reset
-		temp = NULL;
-
-		return 0;
+		return new_node;
 	}
 	else
 	{
@@ -95,9 +104,7 @@ int b_tree::insert_to_(eric_node* node, int value)
 		}
 	}
 
-	//TODO: check and keep banlance
-
-	return 0;
+	return new_node;
 }
 
 eric_node* b_tree::make_node_(int value, node_type type)
@@ -240,8 +247,12 @@ int b_tree::print_breadth_first()
 
 	queue.push(root);
 
+	int pre_depth = -1;
+	int now_depth = 0;
+
 	int item_num = 1;
 
+	printf("=============start output============\n");
 	while(!queue.empty())
 	{
 		if(queue.front()->l_child != NULL){
@@ -251,72 +262,97 @@ int b_tree::print_breadth_first()
 			queue.push(queue.front()->r_child);
 		}
 
-		print_and_format(item_num, queue.front()->value);
+
+		now_depth = get_node_depth_(queue.front());
+		if(now_depth != pre_depth){
+			printf("\n");
+			pre_depth = now_depth;
+		}
+
+		if(queue.front()->parent == NULL){
+			printf("%d  ", queue.front()->value);
+		} else{
+			printf("%d(%d)  ", queue.front()->value, queue.front()->parent->value);
+		}
 		queue.pop();
 
 		item_num++;
 	}
 
+	printf("\n=============end output============\n");
 	return 0;
 }
 
-int b_tree::print_and_format(int item_num,int item_value)
+
+int b_tree::get_balance_factor(eric_node* node)
 {
-	static int depth = get_depth_();
-	static int width = 4;
-	static int interval = 4;
-	static int max = 2 << (depth - 1);//max number in one line, e.g. last line
-	static int last_line_width = max*width + (max - 1)*interval;
-	static int fix_indent = (int)(line_length - last_line_width)/2;
-	static int cur_depth = 1;
+	int l_depth = 1;
+	int r_depth = 1;
 
-	if(item_num == 1)//first number
-	{
-		for(int i = 0; i < fix_indent; ++i){//printf the fix indent
-			printf(" ");
-		}
+	if(node->l_child != NULL){
+		l_depth = get_max_depth_(node->l_child);
+
+		//reset static member:  depth/max_depth
+		s_depth = 1;
+		s_max_depth = 1;
+	}
+	if(node->r_child != NULL){
+		r_depth = get_max_depth_(node->r_child);
+
+		//reset static member:  depth/max_depth
+		s_depth = 1;
+		s_max_depth = 1;
 	}
 
-	int need_width = (1 << (depth + 1 - cur_depth)) - 1;
-	printf("%*d", need_width,item_value);//print the number
-	printf("    ");//the interval
+	int factor = l_depth - r_depth;
 
-	if((item_num + 1) == (1 << cur_depth))//1, 3, 5... last item of per line
-	{
-		cur_depth++;
-
-		printf("\n");//change to next line
-
-		//int cur_line_item = (1 << depth) - 1;
-		for(int i = 0; i < fix_indent; ++i){//printf the fix indent
-			printf(" ");
-		}
-	}
-
-
-	return 0;
+	
+	return factor;
 }
 
-int b_tree::get_depth_()
+int b_tree::get_max_depth_(eric_node* node)
 {
-	if(total_node == 0)
-	{
-		return 0;
+	//update the depth
+	++s_depth;
+	//printf("node-depth: (%d, %d)\n", node->value, s_depth);
+	if(s_depth > s_max_depth){
+		s_max_depth = s_depth;
+		//printf("update max: %d\n",s_max_depth);
 	}
 
-	if(total_node == 1)
-	{
+	if(node->l_child != NULL){
+		get_max_depth_(node->l_child);
+	}
+	if(node->r_child != NULL){
+		get_max_depth_(node->r_child);
+	}
+
+
+	// end one call of `get_max_depth_`
+	--s_depth;
+	//printf("end call (node,value):(%d,%d)\n\n", node->value, s_depth);
+
+	return s_max_depth;
+}
+
+eric_node* b_tree::get_root()
+{
+	return root;
+}
+
+int b_tree::get_node_depth_(eric_node* node)
+{
+	int depth = 1;
+
+	if(node->type == ROOT_NODE){
 		return 1;
 	}
 
-	int depth = 0;
-	int temp = total_node;
-
-	do{
-		temp = temp >> 1;
-		
+	eric_node* temp = node;
+	while(temp->type != ROOT_NODE){
+		temp = temp->parent;
 		depth++;
-	}while(temp);
+	}
 
 	return depth;
 }
