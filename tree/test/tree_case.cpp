@@ -9,7 +9,7 @@ ERIC_TEST(b_tree,instance)
 	b_tree tree;
 }
 
-ERIC_TEST(b_tree,print_all)
+ERIC_TEST(b_tree,print_breadth_first)
 {
 	b_tree tree;
 
@@ -102,7 +102,7 @@ ERIC_TEST(b_tree, balance_factor)
 	printf("balance factor of root is: %d\n",root_factor);
 }
 
-ERIC_TEST(b_tree, rotate)
+ERIC_TEST(b_tree, L_L_rotate)
 {
 	b_tree tree;
 
@@ -115,8 +115,61 @@ ERIC_TEST(b_tree, rotate)
 	tree.insert(20);
 	tree.insert(17);
 	tree.insert(16);
+
+	tree.print_breadth_first();
 }
 
+
+ERIC_TEST(b_tree, L_R_rotate)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(17);
+	tree.insert(18);
+
+	tree.print_breadth_first();
+}
+
+ERIC_TEST(b_tree, R_R_rotate)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(22);
+	tree.insert(24);
+
+	tree.print_breadth_first();
+}
+
+ERIC_TEST(b_tree, R_L_rotate)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(24);
+	tree.insert(22);
+
+	tree.print_breadth_first();
+}
 ERIC_TEST(b_tree, max_depth)
 {
 	int factor = 0;
@@ -192,5 +245,29 @@ ERIC_TEST(b_tree, node_depth)
 
 	temp = tree.insert(16);
 	printf("depth is: %d\n",tree.get_node_depth_(temp));
+}
+
+// 1. check the value like: 010;
+// 2. check if L_L == ROOT_NODE
+#pragma GCC diagnostic ignored "-Wenum-compare" 
+ERIC_TEST(b_tree, enum_case)
+{
+	printf("ROOT_NODE is: %d\n", ROOT_NODE);
+	printf("L_L is: %d\n", L_L);
+	printf("L_R is: %d\n", L_R);
+	printf("R_L is: %d\n", R_L);
+	printf("R_R is: %d\n", R_R);
+
+	int type = 010;
+
+	if(ROOT_NODE == L_L){
+		printf("ROOT_NODE == L_L\n");
+	}else{
+		printf("ROOT_NODE != L_L\n");
+	}
+
+	if(type == L_NODE && type == L_R){
+		printf("type == L_NODE && type == L_R\n");
+	}
 }
 #pragma GCC diagnostic pop

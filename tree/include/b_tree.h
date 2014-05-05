@@ -3,11 +3,19 @@
 //balance tree
 //
 
+// NOTE: start with 0 means these are Octal numbers (base 8)
 typedef enum node_type{
 	ROOT_NODE   = 01,
 	L_NODE      = 010,
 	R_NODE 		= 0100
 }node_type;
+
+typedef enum unbalance_type{
+	L_L = 01,
+	L_R = 010,
+	R_L = 0100,
+	R_R = 01000
+}unbalance_type;
 
 typedef struct eric_node
 {
@@ -32,10 +40,6 @@ public:
 	int find();
 	int reset();
 
-	// pre-order traversal
-	// root->left->right
-	int print_all();
-
 	int print_breadth_first();
 
 	// height of left-subtree subs height of right-subtree
@@ -43,32 +47,31 @@ public:
 	int get_max_depth_(eric_node* node);
 	int get_node_depth_(eric_node* node);
 
+	int check_and_rebalance();
+	int rotate_node(eric_node* node);
+	unbalance_type get_unbalance_type(eric_node* node);
+	int rotate_from_L_L(eric_node* node);
+	int rotate_from_L_R(eric_node* node);
+	int rotate_from_R_L(eric_node* node);
+	int rotate_from_R_R(eric_node* node);
 
 	eric_node* get_root();
+
 private:
-	eric_node* root;
 
 	eric_node* make_node_(int value, node_type type);
-
 	eric_node* insert_to_(eric_node* node, int value);
-
 
 	int destroy_tree_();
 	int destroy_node_(eric_node* node);
-
-	int print_node_(eric_node* node);
-
 	bool tree_is_empty_();
 
-	// utility for printing
-	int root_indent;
-	int get_indent_(eric_node* node);
+private:
+	eric_node* root;
+
+	int total_node;
 
 	static int s_depth;// used by get_max_depth_()
 	static int s_max_depth;// used by get_max_depth_()
-
-
-	int line_length;//assume the terminal length per line
-	int total_node;
 };
 #endif

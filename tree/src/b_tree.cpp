@@ -3,24 +3,6 @@
 #include <stack>
 #include "b_tree.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wwrite-strings"
-char *prefix_width[10] = {
-	"\t",
-	"\t\t",
-	"\t\t\t",
-	"\t\t\t\t",
-	"\t\t\t\t\t",
-	"\t\t\t\t\t\t",
-	"\t\t\t\t\t\t\t",
-	"\t\t\t\t\t\t\t\t",
-	"\t\t\t\t\t\t\t\t\t",
-	"\t\t\t\t\t\t\t\t\t\t"
-};
-
-char line_indent[6] = {40,32,24,16,8,0};
-
-#pragma GCC diagnostic pop
 
 int b_tree::s_depth = 1;
 int b_tree::s_max_depth = 1;
@@ -29,8 +11,6 @@ using namespace std;
 
 b_tree::b_tree():
 	root(NULL),
-	root_indent(5),
-	line_length(128),
 	total_node(0)
 {
 	//init root node
@@ -50,7 +30,16 @@ eric_node* b_tree::insert(int value)
 		printf("insert %d error\n",value);
 	}
 
-	//TODO: check and keep banlance
+	// Check and keep banlance
+	// Now just check the grand-parent node of new-inserted
+	int balance_factor = 0;
+	balance_factor = get_balance_factor(root);
+	if(balance_factor > 1 || balance_factor < -1)
+	{
+		if(new_node->parent->parent != NULL){
+			rotate_node(new_node->parent->parent);
+		}
+	}
 
 	total_node++;
 
@@ -134,6 +123,12 @@ int b_tree::destroy_node_(eric_node* node)
 	if(node->l_child == NULL && node->r_child == NULL)
 	{
 		//update parent
+		//if(node->type == L_NODE){
+		//	node->parent->l_child == NULL;
+		//}else if(node->type == R_NODE){
+		//	node->parent->r_child == NULL;
+		//}
+
 		if(node->parent != NULL)
 		{
 			if(node->parent->l_child == node)
@@ -146,7 +141,7 @@ int b_tree::destroy_node_(eric_node* node)
 			}
 			else
 			{
-				printf("node doesn't contained by it's parent!\n");
+				printf("node %d doesn't contained by it's parent!\n", node->value);
 				return -1;
 			}
 		}
@@ -170,76 +165,11 @@ int b_tree::destroy_node_(eric_node* node)
 	return 0;
 }
 
-int b_tree::print_all()
-{
-	print_node_(root);	
-	return 0;
-}
-
-int b_tree::print_node_(eric_node* node)
-{
-	if(node->type == ROOT_NODE)
-	{
-		printf("%s node value: %d\n",prefix_width[root_indent],node->value);
-	}
-	else
-	{
-
-		printf("%s node value: %d",prefix_width[get_indent_(node)],node->value);
-	}
-
-	if(node->l_child != NULL)
-	{
-		print_node_(node->l_child);
-	}
-	if(node->r_child != NULL)
-	{
-		print_node_(node->r_child);
-	}
-
-	return 0;
-}
-
 bool b_tree::tree_is_empty_()
 {
 	return (root->value == -1 && root->l_child == NULL && root->r_child == NULL);
 }
 
-int b_tree::get_indent_(eric_node* node)
-{
-	if(node->type == ROOT_NODE)
-	{
-		return root_indent;
-	}
-
-	unsigned char l_r_order[20] = {0};
-	eric_node* temp = node;
-	int depth = 0;
-
-	l_r_order[depth] = temp->type;
-
-
-	while(temp->parent->type != ROOT_NODE)
-	{
-		temp = temp->parent;
-
-		depth++;
-		l_r_order[depth] = temp->type;
-	}
-
-	int indent = root_indent;
-	for(int i = depth; i >= 0; i-- )
-	{
-		if(l_r_order[depth] == L_NODE) {
-			indent--;
-		}
-		else if(l_r_order[depth] == R_NODE){
-			indent++;
-		} 
-	}
-
-	return indent;
-}
 
 int b_tree::print_breadth_first()
 {
@@ -255,6 +185,7 @@ int b_tree::print_breadth_first()
 	printf("=============start output============\n");
 	while(!queue.empty())
 	{
+		//printf("in while\n");
 		if(queue.front()->l_child != NULL){
 			queue.push(queue.front()->l_child);
 		}
@@ -286,6 +217,10 @@ int b_tree::print_breadth_first()
 
 int b_tree::get_balance_factor(eric_node* node)
 {
+	if(node == NULL){
+		printf("node is null in get_balance_factor\n");
+		return -1;
+	}
 	int l_depth = 1;
 	int r_depth = 1;
 
@@ -355,4 +290,142 @@ int b_tree::get_node_depth_(eric_node* node)
 	}
 
 	return depth;
+}
+
+int b_tree::rotate_node(eric_node* node)
+{
+	unbalance_type type = get_unbalance_type(node);
+
+	if(type == L_L){
+
+		rotate_from_L_L(node);
+	}else if(type == L_R){
+		
+		rotate_from_L_R(node);
+	}else if(type == R_L){
+
+		rotate_from_R_L(node);
+	}else if(type == R_R){
+
+		rotate_from_R_R(node);
+	}
+	return 0;
+}
+
+unbalance_type b_tree::get_unbalance_type(eric_node* node)
+{
+	unbalance_type type;
+
+	if(node->l_child != NULL){
+		if(node->l_child->l_child != NULL){
+
+			type = L_L;
+		}else if(node->l_child->r_child != NULL){
+
+			type = L_R;
+		}
+	}
+	else if(node->r_child != NULL){
+		if(node->r_child->r_child != NULL){
+
+			type = R_R;
+		}else if(node->r_child->l_child){
+
+			type = R_L;	
+		}
+	}
+
+	return type;
+}
+
+
+int b_tree::rotate_from_L_L(eric_node* up_node)
+{
+	eric_node* center_node = up_node->l_child; 
+
+	// process the parent of up_node
+	if(up_node->type == L_NODE){
+		up_node->parent->l_child = center_node;
+	}else if(up_node->type == R_NODE){
+		up_node->parent->r_child = center_node;
+	}
+
+	// process center
+	center_node->r_child = up_node; //center --> up
+	center_node->parent = up_node->parent;
+
+	// process the 'up_node', now it's child of center
+	//
+	up_node->parent = center_node;  //up --> center
+	up_node->l_child = NULL;
+
+
+
+
+	return 0;
+}
+int b_tree::rotate_from_L_R(eric_node* up_node)
+{
+	// FIRST: rotate to L_L type
+	eric_node* center_node = up_node->l_child;
+	eric_node* down_node   = center_node->r_child;
+
+	// up_node
+	up_node->l_child = down_node;
+
+	// down_node (after change will be center)
+	down_node->parent = up_node;
+	down_node->l_child = center_node;
+
+	// center_node(after change will be down_node)
+	center_node->parent = down_node;
+	center_node->r_child = NULL;
+		
+	// SECOND: process as L_L
+	rotate_from_L_L(up_node);
+
+	return 0;
+}
+int b_tree::rotate_from_R_L(eric_node* up_node)
+{
+	// FIRST: rotate to R_R type
+	eric_node* center_node = up_node->r_child;
+	eric_node* down_node = center_node->l_child;
+
+	// up_node
+	up_node->r_child = down_node;
+
+	// down_node (after change, will be center-node)
+	down_node->parent = up_node;
+	down_node->r_child = center_node;
+
+	// center_node (after change, will be down-node)
+	center_node->parent = down_node;
+	center_node->l_child = NULL;	
+
+	// SECOND: process as R_R
+	rotate_from_R_R(up_node);
+
+	return 0;
+}
+int b_tree::rotate_from_R_R(eric_node* up_node)
+{
+	eric_node* center_node = up_node->r_child;
+
+	// process the parent of up_node
+	if(up_node->type == L_NODE){
+		up_node->parent->l_child = center_node;
+	}else if(up_node->type == R_NODE){
+		up_node->parent->r_child = center_node;
+	}
+
+	// process the center-node
+	center_node->l_child = up_node;
+	center_node->parent = up_node->parent;
+
+	// process the up-node(now it's the l_child of center-node)
+	up_node->parent = center_node;
+	up_node->r_child = NULL;
+
+	return 0;
 }
