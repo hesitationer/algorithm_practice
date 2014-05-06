@@ -170,6 +170,136 @@ ERIC_TEST(b_tree, R_L_rotate)
 
 	tree.print_breadth_first();
 }
+
+ERIC_TEST(b_tree, find)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(24);
+	tree.insert(22);
+
+	tree.print_breadth_first();
+
+	int to_find = 5;
+	eric_node* result = tree.find(to_find);
+	printf("to find is %d \n",to_find);
+
+	if(result == NULL){
+		printf("find failed\n");
+	}else{
+
+		if(result->parent != NULL){
+			printf("parent is %d\n", result->parent->value);
+		}
+		if(result->l_child != NULL){
+			printf("l_child is %d\n", result->l_child->value);
+		}
+		if(result->r_child != NULL){
+			printf("r_child is %d\n", result->r_child->value);
+		}
+	}
+}
+
+ERIC_TEST(b_tree, remove_R_both_LR)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(24);
+	tree.insert(22);
+	tree.insert(27);
+	tree.insert(33);
+
+	printf("before remove\n");
+	tree.print_breadth_first();
+
+	tree.remove(15);
+	printf("after remove\n");
+	tree.print_breadth_first();
+}
+
+ERIC_TEST(b_tree, remove_R_R)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(24);
+	tree.insert(22);
+	tree.insert(33);
+
+	printf("before remove\n");
+	tree.print_breadth_first();
+
+	tree.remove(15);
+	printf("after remove\n");
+	tree.print_breadth_first();
+}
+
+ERIC_TEST(b_tree, remove_R_L)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(24);
+	tree.insert(22);
+	tree.insert(27);
+
+	printf("before remove\n");
+	tree.print_breadth_first();
+
+	tree.remove(15);
+	printf("after remove\n");
+	tree.print_breadth_first();
+}
+
+
+ERIC_TEST(b_tree, remove_L_R)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(24);
+	tree.insert(22);
+
+	printf("before remove\n");
+	tree.print_breadth_first();
+
+	tree.remove(15);
+	printf("after remove\n");
+	tree.print_breadth_first();
+}
+
 ERIC_TEST(b_tree, max_depth)
 {
 	int factor = 0;
@@ -270,4 +400,23 @@ ERIC_TEST(b_tree, enum_case)
 		printf("type == L_NODE && type == L_R\n");
 	}
 }
+
+ERIC_TEST(b_tree, if_delete_zero_out)
+{
+	b_tree *t1 = new b_tree;
+	t1->insert(5);
+	t1->insert(7);
+
+	eric_node* temp = t1->get_root()->r_child;
+	printf("%d\n",temp->value);
+	delete temp;
+
+	if(temp == NULL){
+		printf("temp == NULL\n");
+	}else if(temp != NULL){
+		printf("temp != NULL\n");
+	}
+}
+
+
 #pragma GCC diagnostic pop

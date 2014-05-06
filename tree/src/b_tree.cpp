@@ -46,6 +46,286 @@ eric_node* b_tree::insert(int value)
 	return new_node;
 }
 
+eric_node* b_tree::find(int value)
+{
+	eric_node* target = NULL;
+
+	target = root;
+	while(target != NULL){
+		if(value == target->value){
+			break;
+		}else{
+			if(value > target->value){
+
+				target = target->r_child;
+			}else{
+
+				target = target->l_child;
+			}
+		}
+	}
+
+	if(target == NULL){
+		printf("can't find node of given value: %d\n",value);
+	}
+	return  target;
+}
+
+int b_tree::remove_back(int value)
+{
+	//find 
+	eric_node* target = NULL;
+	target = find(value);
+	if(target == NULL){
+		printf("the node of value %d doesn't exist!\n",value);
+		return -1;
+	}
+
+	// Check the height of left/right sub-tree
+	int l_height = 0, r_height = 0;
+	if(target->l_child != NULL){
+		l_height = get_max_depth_(target->l_child);
+	}
+	if(target->r_child != NULL){
+		r_height = get_max_depth_(target->r_child);
+	}
+
+	// Upgrade the higher sub-tree. 
+	// Thus the balance factor tends to be small
+	//
+	if(l_height <= r_height){// upgrade the right-subtree
+
+		upgrade_right_child(target->r_child);
+	}
+	else if(l_height > r_height){// upgrade the left-subthree
+
+		upgrade_left_child(target->l_child);
+	}
+	return 0;
+}
+
+int b_tree::remove(int value)
+{
+	//find 
+	eric_node* target = NULL;
+	target = find(value);
+	if(target == NULL){
+		printf("the node of value %d doesn't exist!\n",value);
+		return -1;
+	}
+
+	int l_height = 0, r_height = 0;
+	if(target->l_child != NULL){
+		l_height = get_max_depth_(target->l_child);
+
+		//reset static member:  depth/max_depth
+		s_depth = 1;
+		s_max_depth = 1;
+	}
+	if(target->r_child != NULL){
+		r_height = get_max_depth_(target->r_child);
+
+		//reset static member:  depth/max_depth
+		s_depth = 1;
+		s_max_depth = 1;
+	}
+
+	// decide direction from which to upgrade after removing
+	rm_direction dir;
+	if(l_height > r_height){
+
+		dir = L_REMOVE;
+	}
+	else if(l_height <= r_height){
+
+		dir = R_REMOVE;
+	}
+
+	// remove
+	remove_node(target, dir);
+
+	return 0;
+}
+
+int b_tree::remove_node(eric_node* node, rm_direction dir)
+{
+	if(node->l_child == NULL && node->r_child == NULL){// leaf-node
+
+		eric_node* parent = node->parent;
+		if(parent != NULL){// has parent
+
+			if(node->type == L_NODE){// node is left child
+
+				parent->l_child = NULL;
+			}
+			else if(node->type == R_NODE){// node is right child
+
+				parent->r_child = NULL;
+			}
+		}
+
+		delete node;
+
+		// check the balance factor of node->parent
+		int factor = get_balance_factor(parent);
+		if(factor > 1 || factor < -1){
+			rotate_node(parent);
+		}
+
+		printf("return from if\n");
+		return 0;
+	}
+
+	if(dir == L_REMOVE){
+
+		if(node->l_child != NULL){
+
+			node->value = node->l_child->value;
+			dir = dir;// NOTE: do NOT change dir!!
+			remove_node(node->l_child, dir);
+		}
+		else if(node->l_child == NULL && 
+				node->r_child != NULL){
+
+			node->value = node->r_child->value;
+			dir = R_REMOVE;// NOTE: change dir!!
+			remove_node(node->r_child, dir);
+		}
+	}
+	else if(dir == R_REMOVE){
+
+		if(node->r_child != NULL){
+
+			node->value = node->r_child->value;
+			dir = dir;// NOTE: do NOT change dir!!
+			remove_node(node->r_child, dir);
+		}
+		else if(node->r_child == NULL && 
+				node->l_child != NULL){
+
+			node->value = node->l_child->value;
+			dir = L_REMOVE;// NOTE: change dir!!
+			remove_node(node->l_child, dir);
+		}
+	}
+
+
+
+	//printf("node:l_depth:r_depth: (%d,%d,%d) l_child:r_child: (%d,%d)\n", 
+			//node->value, l_height, r_height,node->l_child->value, node->r_child->value);
+	//if(l_height > r_height){
+
+	//	node->value = node->l_child->value;
+	//	remove_node(node->l_child);	
+	//}
+	//else if(l_height <= r_height){
+
+	//	node->value = node->r_child->value;
+	//	remove_node(node->r_child);
+	//}
+
+	return 0;
+}
+
+int b_tree::upgrade_right_child(eric_node* node)
+{
+	eric_node* parent = node->parent;
+	if(parent == NULL){
+		printf("node doesn't has parent can't upgrade!\n");
+		return -1;
+	}else{
+		// overwrite the parent first
+		parent->value = node->value;
+	}
+
+
+	// upgrade the r_child
+	eric_node* temp = node;
+	while(temp != NULL){
+
+		if(temp->r_child != NULL){ //still has r_child
+
+			temp->value = temp->r_child->value;
+			temp = temp->r_child;
+		}
+		else{ //doesn't has r_child
+
+			if(temp->l_child != NULL){
+
+				// temp->l_child  --->  temp
+				// this will lead `r_child < temp->parent`
+				temp->value = temp->l_child->value; 
+
+				//swap<temp,temp->parent>
+				int swap = temp->parent->value;
+				temp->parent->value = temp->value;
+				temp->value = swap;
+
+				// delete the l_child. THE END
+				// Here Must promise the current l_child is leaf child
+				delete temp->l_child;
+				temp->l_child = NULL;
+				break;
+
+			}
+			else if(temp->l_child == NULL){//the leaf node. THE END.
+				
+				temp->parent->r_child = NULL;
+				delete temp;
+				temp = NULL;
+			}
+		}
+	}
+
+	return 0;
+}
+
+int b_tree::upgrade_left_child(eric_node* node)
+{
+	if(node->parent == NULL){
+		printf("node doesn't has parent can't be upgreaded!\n");
+		return -1;
+	}else{
+		node->parent->value = node->value;
+	}
+
+	// upgrade the l_child
+	eric_node* temp = node;
+	while(temp != NULL){
+
+		if(temp->l_child != NULL){
+
+			temp->value = temp->l_child->value;
+			temp = temp->l_child;
+		}
+		else {
+			if(temp->r_child != NULL){
+
+				// this will lead `l_child > temp->parent`
+				temp->value = temp->r_child->value;
+
+				//swap<temp, temp->parent>
+				int swap = temp->parent->value;
+				temp->parent->value = temp->value;
+				temp->value = swap;
+
+				// delete temp->r_child. THE END
+				// which is a leaf-node
+				delete temp->r_child;
+				temp->r_child = NULL;
+				break;
+			}
+			else if(temp->r_child == NULL){// leaf node. THE END
+
+				temp->parent->l_child = NULL;
+				delete temp;
+				temp = NULL;
+			}
+		}
+	}
+
+	return 0;
+}
 
 eric_node* b_tree::insert_to_(eric_node* node, int value)
 {
@@ -202,9 +482,19 @@ int b_tree::print_breadth_first()
 
 		if(queue.front()->parent == NULL){
 			printf("%d  ", queue.front()->value);
-		} else{
-			printf("%d(%d)  ", queue.front()->value, queue.front()->parent->value);
 		}
+		else{
+			char id[2] = {0}; 
+			node_type type = queue.front()->type;
+			if(type == L_NODE){
+				snprintf(id,2,"l");	
+			}
+			else if(type == R_NODE){
+				snprintf(id,2,"r");	
+			}
+			printf("%s-%d(%d)  ", id,queue.front()->value, queue.front()->parent->value);
+		}
+
 		queue.pop();
 
 		item_num++;
@@ -299,15 +589,26 @@ int b_tree::rotate_node(eric_node* node)
 	if(type == L_L){
 
 		rotate_from_L_L(node);
-	}else if(type == L_R){
+	}
+	else if(type == L_R){
 		
 		rotate_from_L_R(node);
-	}else if(type == R_L){
+	}
+	else if(type == R_L){
 
 		rotate_from_R_L(node);
-	}else if(type == R_R){
+	}
+	else if(type == R_R){
 
 		rotate_from_R_R(node);
+	}
+	else if(type == L_BOTH){
+
+		rotate_from_L_BOTH(node);
+	}
+	else if(type == R_BOTH){
+
+		rotate_from_R_BOTH(node);
 	}
 	return 0;
 }
@@ -317,21 +618,37 @@ unbalance_type b_tree::get_unbalance_type(eric_node* node)
 	unbalance_type type;
 
 	if(node->l_child != NULL){
-		if(node->l_child->l_child != NULL){
+		if(node->l_child->l_child != NULL && 
+				node->l_child->r_child == NULL){ // L-L
 
 			type = L_L;
-		}else if(node->l_child->r_child != NULL){
+		}
+		else if(node->l_child->r_child != NULL && 
+				node->l_child->l_child == NULL){// L-R
 
 			type = L_R;
 		}
+		else if(node->l_child->l_child != NULL &&
+				node->l_child->r_child != NULL){// L-(LR)
+
+			type = L_BOTH;
+		}
 	}
 	else if(node->r_child != NULL){
-		if(node->r_child->r_child != NULL){
+		if(node->r_child->r_child != NULL && 
+				node->r_child->l_child == NULL){// R_R
 
 			type = R_R;
-		}else if(node->r_child->l_child){
+		}
+		else if(node->r_child->l_child != NULL && 
+				node->r_child->r_child == NULL){// R_L
 
 			type = R_L;	
+		}
+		else if(node->r_child->l_child != NULL &&
+				node->r_child->r_child != NULL){// R_(LR)
+
+			type = R_BOTH;
 		}
 	}
 
@@ -426,6 +743,78 @@ int b_tree::rotate_from_R_R(eric_node* up_node)
 	// process the up-node(now it's the l_child of center-node)
 	up_node->parent = center_node;
 	up_node->r_child = NULL;
+
+	return 0;
+}
+
+int b_tree::rotate_from_L_BOTH(eric_node* up_node)
+{
+	/*
+	 *			A					B
+	 *		  B  	     ===>    C     D 
+	 *		C    D						 A
+	 * */
+
+	eric_node* A = up_node;
+
+	eric_node* B = A->l_child;
+
+	eric_node* D = B->r_child;
+
+	// A->parent
+	if(A->type == L_NODE){
+		A->parent->l_child = B;
+	}
+	else if(A->type == R_NODE){
+		A->parent->r_child = B;
+	}
+
+	// B
+	B->parent = A->parent;
+
+	// D
+	D->r_child = A;
+
+	// A
+	A->parent = D;
+	A->l_child = NULL;
+
+	return 0;
+}
+
+int b_tree::rotate_from_R_BOTH(eric_node* up_node)
+{
+	/*
+	 *			A					B
+	 *		      B     ===>      C   D 
+	 *		    C   D			A
+	 * */
+
+	eric_node* A = up_node;
+
+	eric_node* B = A->r_child;
+
+	eric_node* C = B->l_child;
+
+	// A->parent
+	if(A->type == R_NODE){
+
+		A->parent->r_child = B;
+	}
+	else if(A->type == L_NODE){
+
+		A->parent->l_child = B;
+	}
+
+	// B
+	B->parent = A->parent;
+
+	// C
+	C->r_child = A;
+
+	// A
+	A->parent = C;
+	A->r_child = NULL;
 
 	return 0;
 }
