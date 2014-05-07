@@ -418,5 +418,19 @@ ERIC_TEST(b_tree, if_delete_zero_out)
 	}
 }
 
+ERIC_TEST(b_tree, delete_char_array)
+{
+	char *array = new char[10];
+
+	snprintf(array,10,"hello");
+
+	printf("%s\n", array);
+
+	delete array;
+	if(array != NULL){
+		printf("array != NULL\n");
+	}
+}
+
 
 #pragma GCC diagnostic pop
