@@ -34,3 +34,33 @@ ERIC_TEST(kmp, table)
 	printf("\n");
 
 }
+
+ERIC_TEST(KMP,search)
+{
+	char sub[16];
+	char full[256];
+
+	snprintf(sub,16,"xxxyzyyz");
+	snprintf(full,256,"sdfd2wsdfmzsdfjdflsfjeofdsfsxxxyzyyzsdfsdferererwxcvlaldfuiwfdf");
+	//snprintf(sub,16,"abc");
+	//snprintf(full,256,"abcdefg");
+
+	for(size_t i = 0; i < strlen(full); ++i){
+		if(i%9 == 0){
+			printf("\n");
+		}
+		printf("%c |",full[i]);
+	}
+	printf("\n");
+
+	int ret = match_or_part_match_KMP_v1(sub,full);
+	if(ret == 0){
+		printf("exactly same!\n");
+	}
+	else if(ret == 1){
+		printf("partion matched!\n");
+	}
+	else if(ret == -1){
+		printf("NOT matched!\n");
+	}
+}
