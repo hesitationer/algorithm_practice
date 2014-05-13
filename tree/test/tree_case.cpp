@@ -403,7 +403,7 @@ ERIC_TEST(b_tree, enum_case)
 
 ERIC_TEST(b_tree, if_delete_zero_out)
 {
-	b_tree *t1 = new b_tree;
+	b_tree *t1 = new b_tree();
 	t1->insert(5);
 	t1->insert(7);
 
@@ -426,7 +426,7 @@ ERIC_TEST(b_tree, delete_char_array)
 
 	printf("%s\n", array);
 
-	delete array;
+	delete[] array;
 	if(array != NULL){
 		printf("array != NULL\n");
 	}
