@@ -60,18 +60,18 @@ def choose_bandwith(sample_used):
 		sum_all = sum_all + item
 		sum_square = sum_square + item*item
 
-	print 'sum_all, sum_square', sum_all, sum_square
+	#print 'sum_all, sum_square', sum_all, sum_square
 
 	mean = sum_all/len(sample_used)
-	print 'len is', len(sample_used)
-	print 'mean is:',mean
+	#print 'len is', len(sample_used)
+	#print 'mean is:',mean
 
 	stand_deviation = np.power((sum_square/len(sample_used) - mean*mean),0.5)
-	print 'stand_deviation is:',stand_deviation
-	print 'np.std is', np.std(sample_used)
+	#print 'stand_deviation is:',stand_deviation
+	#print 'np.std is', np.std(sample_used)
 
 	bandth = 1.06*stand_deviation*np.power(len(sample_used), -0.2)
-	print 'bandth is:',bandth
+	#print 'bandth is:',bandth
 
 	return bandth
 
@@ -90,15 +90,8 @@ def estimate_standard_norm():
 	x = np.arange(-4.5,4.5,0.1)
 
 	#generate 100 random number
-	scalor = 2.5
-	random_sample_1 = scalor*np.random.rand(1,50)
-	random_sample_2 = -scalor*np.random.rand(1,50)
-	random_sample_x = random_sample_1[0].tolist() + random_sample_2[0].tolist()
-	#random_sample = eric_gaussian(np.asarray(random_sample_x),0,1)
 	random_sample = np.random.normal(0,1,100)
 	
-	print random_sample
-
 	#mark these random number on x-coordinate
 	for marker in random_sample:
 		pyplot.axvline(x=marker,color='b',ymax=0.02)
@@ -107,7 +100,7 @@ def estimate_standard_norm():
 	estimate_value = 0.0
 	for marker in random_sample:
 		estimate_value = estimate_value + gaussian_kde_with_bandth(x,marker,1,0.05)
-	estimate_value = estimate_value/len(random_sample)
+	estimate_value = estimate_value/(len(random_sample)*0.05)
 	#plot the estimate distribution
 	pyplot.plot(x,estimate_value,'r--')
 
@@ -115,7 +108,7 @@ def estimate_standard_norm():
 	estimate_value = 0.0
 	for marker in random_sample:
 		estimate_value = estimate_value + gaussian_kde_with_bandth(x,marker,1,2)
-	estimate_value = estimate_value/len(random_sample)
+	estimate_value = estimate_value/(len(random_sample)*2)
 	#plot the estimate distribution
 	pyplot.plot(x,estimate_value,'g--')
 
@@ -123,30 +116,51 @@ def estimate_standard_norm():
 	estimate_value = 0.0
 	for marker in random_sample:
 		estimate_value = estimate_value + gaussian_kde_with_bandth(x,marker,1,0.337)
-	estimate_value = estimate_value/len(random_sample)
+	estimate_value = estimate_value/(len(random_sample)*0.337)
 	#plot the estimate distribution
 	pyplot.plot(x,estimate_value,'black', ls='--')
 
 	#estimate with  Silverman's rule of thumb
 	estimate_value = 0.0
+	n = 100
+	d = 1
+	first = n*(d+2)/4.
+	second = (-1./(d+4))
+	silver_factor = np.power(first,second)
 	for marker in random_sample:
-		estimate_value = estimate_value + gaussian_kde_with_bandth(x,marker,1,choose_bandwith(random_sample))
-	estimate_value = estimate_value/len(random_sample)
+		estimate_value = estimate_value + gaussian_kde_with_bandth(x,marker,1,silver_factor)
+	estimate_value = estimate_value/(len(random_sample)*silver_factor)
 	#estimate_value = estimate_value/choose_bandwith(random_sample)
 	#plot the estimate distribution
 	pyplot.plot(x,estimate_value,'yellow',ls='-')
 
+
+	#estimate with scotts_factor
+	estimate_value = 0.0
+	n = 100
+	d = 1
+	first = n
+	second = (-1./(d+4))
+	scotts_factor = np.power(first,second)
+	for marker in random_sample:
+		estimate_value = estimate_value + gaussian_kde_with_bandth(x,marker,1,scotts_factor)
+	estimate_value = estimate_value/(len(random_sample)*scotts_factor)
+	#estimate_value = estimate_value/choose_bandwith(random_sample)
+	#plot the estimate distribution
+	pyplot.plot(x,estimate_value,'purple',ls='-')
 
 	#the scipy lib result
 	lib_result = kde.gaussian_kde(random_sample)
 	xgrid = np.linspace(random_sample.min(),random_sample.max(),100)
 	pyplot.plot(xgrid,lib_result(xgrid),'red',ls=':',lw=2)
 
+	print lib_result
+
 	#plot the standard gaussian (0,1)
 	pyplot.plot(x,gaussian_kde_with_bandth(x,0,1,1),'grey')
 	pyplot.plot(x,mlab.normpdf(x,0,1),'g*')
 
-	pyplot.ylim(-0.02,0.5)
+	pyplot.ylim(-0.02,0.9)
 	pyplot.show()
 
 if __name__=="__main__":
