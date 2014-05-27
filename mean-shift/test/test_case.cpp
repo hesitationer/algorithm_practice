@@ -1,4 +1,5 @@
 #include "pick_up_test_case.h"
+#include "mean_shift.h"
 #include "opencv2/opencv.hpp"
 
 #pragma GCC diagnostic push
@@ -13,6 +14,7 @@ bool selectObject = false;
 Point origin;
 int trackObject = 0;
 Rect selection;
+int vmin = 10, vmax = 256, smin = 30;
 static void onMouse(int event, int x, int y, int, void*)
 {
 	if(selectObject){
@@ -45,6 +47,9 @@ ERIC_TEST(mean_shift, tracking)
 {
 	Mat frame;
 	Rect track_window(0,0,55,15);
+	int hsize = 16;
+	float hranges[] = {0,180};
+	const float* phranges = hranges;
 	VideoCapture capture(0);
 	
 	capture.open(0);
@@ -55,10 +60,12 @@ ERIC_TEST(mean_shift, tracking)
 	}
 
 	// set mouse callback
-	namedWindow("mean_shift", 0);
+	namedWindow("mean_shift", CV_WINDOW_AUTOSIZE);
 	setMouseCallback("mean_shift", onMouse, 0);
 
 	bool paused = false;
+	Mat hsv, hue, mask, hist, histimg = Mat::zeros(200,320,CV_8UC3), backproj;
+	Mat roi, maskroi;
 	while(1){
 
 		// capture frame
@@ -68,29 +75,76 @@ ERIC_TEST(mean_shift, tracking)
 
 		frame.copyTo(image);
 
-		//if(!paused){
-		//	if(trackObject){
+		if(!paused){
 
-		//		printf("mean_shift...\n");
-		//	}
-		//}
-		//else if( trackObject < 0){
-
-		//	paused = false;
-		//}
+			cvtColor(image,hsv,COLOR_BGR2HSV);
+			imshow("hsv",hsv);
 
 
-		// prepare probability image
+			if(trackObject){
 
-		// mean-shift
-		
-		// update and draw the bbox
-		track_window = selection;
+				int _vmin = vmin, _vmax = vmax;
+				inRange(hsv, Scalar(0,smin,MIN(_vmin,_vmax)),
+						Scalar(180,256,MAX(_vmin,_vmax)), mask);
+				imshow("mask",mask);
+
+				int from_to[] = {0,0};
+				hue.create(hsv.size(),hsv.depth());
+				mixChannels(&hsv, 1, &hue, 1, from_to, 1);
+
+
+
+				if(trackObject < 0){// update selection
+
+					track_window = selection;
+					trackObject = 1;
+
+					roi = hue(selection);
+					maskroi = mask(selection);
+					calcHist(&roi, 1, 0, maskroi, hist, 1, &hsize, &phranges);
+					normalize(hist,hist,0,255,CV_MINMAX);
+					imshow("roi",roi);
+
+					//draw the hist
+					histimg = Scalar::all(0);
+                    int binW = histimg.cols / hsize;
+                    Mat buf(1, hsize, CV_8UC3);
+                    for( int i = 0; i < hsize; i++ )
+                        buf.at<Vec3b>(i) = Vec3b(saturate_cast<uchar>(i*180./hsize), 255, 255);
+                    cvtColor(buf, buf, CV_HSV2BGR);
+
+                    for( int i = 0; i < hsize; i++ )
+                    {
+                        int val = saturate_cast<int>(hist.at<float>(i)*histimg.rows/255);
+                        rectangle( histimg, Point(i*binW,histimg.rows),
+                                   Point((i+1)*binW,histimg.rows - val),
+                                   Scalar(buf.at<Vec3b>(i)), -1, 8 );
+                    }
+
+					imshow("histimg",histimg);
+				}// if(trackObject < 0)
+
+				// prepare probability image
+				calcBackProject(&hue, 1, 0, hist, backproj, &phranges);
+				backproj &= mask;
+				imshow("backproj",backproj);
+
+				// mean-shift
+				//printf("backproj: d,w,h: (%d,%d,%d)\n",backproj.dims,
+				//		   	backproj.cols,
+				//		   	backproj.rows);
+				track_window = MeanShiftTracker::MeanShift(backproj,track_window);
+			}
+		}// if(!paused)
+		else if( trackObject < 0){
+
+			paused = false;
+		}
+
 		rectangle(frame,Point(track_window.x,track_window.y),
-				Point(track_window.x + track_window.width, track_window.y + track_window.height),
-			   	CV_RGB(0,255,0));
-
-
+				Point(track_window.x + track_window.width,
+					track_window.y + track_window.height),
+				CV_RGB(0,255,0));
 		imshow("mean_shift",frame);
 
 		// chance to break

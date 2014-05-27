@@ -114,6 +114,30 @@ mean-shift/fast:
 	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/build
 .PHONY : mean-shift/fast
 
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.o: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.o
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.o
+
+# target to build an object file
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.o:
+	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.o
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.o
+
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.i: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.i
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.i
+
+# target to preprocess a source file
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.i:
+	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.i
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.i
+
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.s: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.s
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.s
+
+# target to generate assembly for a file
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.s:
+	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.s
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.s
+
 home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/test/test_case.o: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/test/test_case.cpp.o
 .PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/test/test_case.o
 
@@ -195,6 +219,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... mean-shift"
 	@echo "... rebuild_cache"
+	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.o"
+	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.i"
+	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.s"
 	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/test/test_case.o"
 	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/test/test_case.i"
 	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/test/test_case.s"
