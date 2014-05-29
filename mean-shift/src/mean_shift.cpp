@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Rect MeanShiftTracker::MeanShift(Mat probImg, Rect track_window)
+Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 {
 	int h_roi = track_window.height;
 	int w_roi = track_window.width;
@@ -14,6 +14,8 @@ Rect MeanShiftTracker::MeanShift(Mat probImg, Rect track_window)
 		int old_x = track_window.width/2;
 		int old_y = track_window.height/2;
 
+		printf("old_x,old_y:(%d,%d)\n",old_x,old_y);
+
 		Mat roi = probImg(track_window);
 
 		float numerator_x = 0.0, denominator_x=0.0;
@@ -22,7 +24,7 @@ Rect MeanShiftTracker::MeanShift(Mat probImg, Rect track_window)
 		for(int row = 0; row < h_roi; ++row){
 			for(int col = 0; col < w_roi; ++col){
 
-				int weight = roi.at<unsigned char>(row,col);
+				int weight = (int)roi.at<unsigned char>(col,row);
 				//printf("weight:%d\n",weight);
 
 				float kernel_value_x = std_gaussian_1d(abs(row - old_x));
@@ -36,9 +38,13 @@ Rect MeanShiftTracker::MeanShift(Mat probImg, Rect track_window)
 		}
 
 		//printf("(A/B):(%f,%f)\n",numerator_y,denominator_y);
-		int delta_x = (int)(numerator_x/denominator_x);
-		int delta_y = (int)(numerator_y/denominator_y);
-		//printf("(%f,%f)\n",delta_x,delta_y);
+		int kernel_x = (int)(numerator_x/denominator_x);
+		int kernel_y = (int)(numerator_y/denominator_y);
+		printf("kernel_x/y:(%d,%d)\n",kernel_x,kernel_y);
+
+		int delta_x = kernel_x - old_x;
+		int delta_y = kernel_y - old_y;
+		printf("delta_x/y:(%d,%d)\n",delta_x,delta_y);
 
 		int n_x = track_window.x + delta_x;
 		int n_y = track_window.y + delta_y;

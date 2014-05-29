@@ -8,7 +8,7 @@ using namespace cv;
 class MeanShiftTracker
 {
 public:
-	static Rect MeanShift(Mat probImg, Rect track_window);
+	static Rect MeanShift(Mat &probImg, Rect track_window);
 
 	static float std_gaussian_1d(float x);
 };

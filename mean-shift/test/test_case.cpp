@@ -156,4 +156,56 @@ ERIC_TEST(mean_shift, tracking)
 	}// while(1)
 }
 
+// This example shows that: 
+//       Mat.ptr() 
+// is much intuitive than
+//       Mat.at()
+ERIC_TEST(mean_shift, mat_ptr)
+{
+	Mat frame;
+	VideoCapture capture(0);
+
+	capture.open(0);
+
+
+	capture >> frame;
+	capture >> frame;
+	capture >> frame;
+	capture >> frame;
+	capture >> frame;
+
+	imshow("cur frame",frame);
+	waitKey(0);
+
+
+	for(int i = 0; i < 5; ++i){
+		for(int j = 0; j < 5; ++j){
+
+			int data0 = frame.ptr(i,j)[0];
+			int data1 = frame.ptr(i,j)[1];
+			int data2 = frame.ptr(i,j)[2];
+			printf("frame(%d,%d):(%d %d %d)  ", i,j,data0,data1,data2);
+		}
+		printf("\n");
+	}
+}
+
+ERIC_TEST(mean_shift, mat_value)
+{
+	Mat my_mat_1(Size(3,3),CV_8UC1);
+	Mat my_mat_3(Size(3,3),CV_8UC3);
+
+	int count = 0;
+	for(int i = 0; i < 3; ++i){
+		for(int j = 0; j < 3; ++j){
+			*my_mat_1.ptr(i,j) = count++;
+		}
+	}
+
+	printf("(dims,channels,rows,cols):%d,%d,%d,%d\n",my_mat_1.dims,
+			my_mat_1.channels(),
+			my_mat_1.rows,
+			my_mat_1.cols);
+}
+
 #pragma GCC diagnostic pop
