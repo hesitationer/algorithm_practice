@@ -230,8 +230,6 @@ def test_atleast():
 
 class lib_gaussian_kde(object):
     def __init__(self, dataset, bw_method=None):
-        print "__init__"
-        print dataset
         self.dataset = atleast_2d(dataset)
         if not self.dataset.size > 1:
             raise ValueError("`dataset` input should have multiple elements.")
@@ -240,8 +238,6 @@ class lib_gaussian_kde(object):
         self.set_bandwidth(bw_method=bw_method)
 
     def evaluate(self, points):
-        print "evaluate"
-        print points
         points = atleast_2d(points)
 
         d, m = points.shape
@@ -257,35 +253,23 @@ class lib_gaussian_kde(object):
 
         result = zeros((m,), dtype=np.float)
 
+        print '(m,n): ',m,self.n
+
         if m >= self.n:
             # there are more points than data, so loop over data
             for i in range(self.n):
                 diff = self.dataset[:, i, newaxis] - points
-                print diff.shape
                 tdiff = dot(self.inv_cov, diff)
-                print 'diff: ', diff
-                print 'tdiff: ', tdiff
                 energy = sum(diff*tdiff,axis=0) / 2.0
-                print 'energy: ', energy
-                print '\n'
                 result = result + exp(-energy)
-                print 'exp(-energy): ', exp(-energy)
-                print 'result: ', result
-                print '\n'
         else:
             # loop over points
             for i in range(m):
                 diff = self.dataset - points[:, i, newaxis]
                 tdiff = dot(self.inv_cov, diff)
-                print 'diff: ', diff
-                print 'tdiff: ', tdiff
                 energy = sum(diff * tdiff, axis=0) / 2.0
-                print 'energy: ', energy
-                print '\n'
                 result[i] = sum(exp(-energy), axis=0)
-                print 'exp(-energy): ', exp(-energy)
-                print 'result: ', result
-                print '\n'
+
 
         result = result / self._norm_factor
 
@@ -325,7 +309,6 @@ class lib_gaussian_kde(object):
 
 
     def _compute_covariance(self):
-        print "_compute_covariance"
         self.factor = self.covariance_factor()
         # Cache covariance and inverse covariance of the data
         if not hasattr(self, '_data_inv_cov'):
@@ -359,17 +342,25 @@ def debug_lib_kde():
     pyplot.ylim(-0.02,0.9)
     pyplot.show()
 
+def test_2d_kde():
+    mean = [0,0]
+    cov = [[1,1],[2,2]]
+    sample = np.random.multivariate_normal(mean,cov, 100)
+
+    print sample.shape
+    print atleast_2d(sample).shape
 
 def test_dot_product():
-    v1 = [1,2,0]
-    v2 = [4,5,6]
+    v1 = [[1,2],[3,4]]
+    v2 = [[1,2,3,4],[4,5,6,7]]
+    v2 = [[1,2],[3,4],[5,6],[7,8]]
     v3 = dot(v1,v2)
-    v4 = np.cross(v1,v2)
+    #v4 = np.cross(v1,v2)
 
     print v1
     print v2
     print v3
-    print v4
+    #print v4
 
 def test_covariance():
     
@@ -407,8 +398,9 @@ if __name__=="__main__":
 
     #test_atleast()
     #test_dot_product()
+    test_2d_kde()
 
-    debug_lib_kde()
+    #debug_lib_kde()
 
     #test_covariance()
 
