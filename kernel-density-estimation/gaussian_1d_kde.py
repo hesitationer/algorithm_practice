@@ -68,21 +68,31 @@ def gaussian_1d_kde(dataset,x_pos):
 def kde_demo():
     dataset = np.random.normal(0,1,100)
 
+    #create plots
+    fig, ax = pyplot.subplots()
+
+    #plot the vertical line
+    for marker in dataset:
+        pyplot.axvline(x=marker,color='b',ymax=0.02)
+
+
     # my kde
     x = np.linspace(dataset.min(),dataset.max(),100)
     result = gaussian_1d_kde(dataset,x)
 
-    pyplot.plot(x,result,'black')
+    pyplot.plot(x,result,'black',label='my kde')
 
-    # standard scipy kde 
-    #kde_object = kde.gaussian_kde(dataset)
-    #pyplot.plot(x,kde_object(x),'red')
+    #plot the standard gaussian (0,1)
+    pyplot.plot(x,mlab.normpdf(x,0,1),'g',lw=2,label='std gaussian')
 
     # scipy kde with debug
     kde_object = my_kde.lib_gaussian_kde(dataset)
-    pyplot.plot(x,kde_object(x),'*-')
+    pyplot.plot(x,kde_object(x),'^',label='scipy lib')
     print 'factor: ',kde_object.factor
 
+    #legend
+    legend = ax.legend(loc='upper right', shadow=True)
+    
 
     pyplot.ylim(-0.02,0.9)
     pyplot.show()
