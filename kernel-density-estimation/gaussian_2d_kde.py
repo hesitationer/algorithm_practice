@@ -106,20 +106,24 @@ def demo():
 
     #plot 
     fig = pyplot.figure()
-    ax = fig.add_subplot(211)
+    ax = fig.add_subplot(121)
     ax.imshow(np.rot90(Z),cmap=pyplot.cm.gist_earth_r,
             extent=[xmin,xmax,ymin,ymax])
-    ax.plot(values[0],values[1],'k.',markersize=2)
+    ax.plot(values[0],values[1],'k.',markersize=2,label='right')
 
-    ax2 = fig.add_subplot(212)
-    ax2.imshow(np.rot90(Z),cmap=pyplot.cm.gist_earth_r,
+    ax2 = fig.add_subplot(122)
+    ax2.imshow(Z,cmap=pyplot.cm.gist_earth_r,
             extent=[xmin,xmax,ymin,ymax])
-    ax2.plot(values[0],values[1],'k.',markersize=2)
+    ax2.plot(values[0],values[1],'k.',markersize=2,label='no rotation')
 
     ax.set_xlim([xmin,xmax])
     ax.set_ylim([ymin,ymax])
     ax2.set_xlim([xmin,xmax])
     ax2.set_ylim([ymin,ymax])
+
+    #legend
+    legend = ax.legend(bbox_to_anchor=(0.2,1.02),loc='lower left', shadow=True)
+    legend = ax2.legend(bbox_to_anchor=(0.2,1.02),loc='lower left', shadow=True)
 
     pyplot.show()
 
