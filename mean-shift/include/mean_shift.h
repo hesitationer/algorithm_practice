@@ -8,8 +8,21 @@ using namespace cv;
 class MeanShiftTracker
 {
 public:
-	static Rect MeanShift(Mat &probImg, Rect track_window);
+	MeanShiftTracker();
+	//~MeanShiftTracker();
+public:
+	Rect MeanShift(Mat &probImg, Rect track_window);
 
-	static float std_gaussian_1d(float x);
+
+//private:
+	float kernel_value(int value, int pos, float sigma);
+	float scotts_factor(int N,int dims);
+	void caculate_variance(Mat &roi, int offset_x, int offset_y);
+
+//private:
+	float h; // bandwidth
+	float sigma_x; // variance
+	float sigma_y; // variance
+
 };
 #endif

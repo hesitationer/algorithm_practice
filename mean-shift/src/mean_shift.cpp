@@ -3,10 +3,18 @@
 
 using namespace std;
 
+MeanShiftTracker::MeanShiftTracker():
+	sigma_x(0),
+	sigma_y(0)
+{
+}
+
 Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 {
 	int h_roi = track_window.height;
 	int w_roi = track_window.width;
+
+	caculate_variance(probImg,0,0);
 
 	for(int iterate_count  = 0;iterate_count<10;iterate_count++){
 
@@ -24,15 +32,16 @@ Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 		for(int row = 0; row < h_roi; ++row){
 			for(int col = 0; col < w_roi; ++col){
 
-				int weight = (int)roi.at<unsigned char>(col,row);
-				//printf("weight:%d\n",weight);
+				float weight = (int)roi.ptr(row,col);
+				printf("weight:%d\n",weight);
 
-				float kernel_value_x = std_gaussian_1d(abs(row - old_x));
-				numerator_x += row*kernel_value_x;
+				float kernel_value_x = kernel_value(old_x, row, sigma_x);
+
+				numerator_x += row*kernel_value_x*weight;
 				denominator_x +=  kernel_value_x;
 
-				float kernel_value_y = std_gaussian_1d(abs(col - old_y));
-				numerator_y += row*kernel_value_y;
+				float kernel_value_y = kernel_value(old_y, col, sigma_y);
+				numerator_y += row*kernel_value_y*weight;
 				denominator_y +=  kernel_value_y;
 			}
 		}
@@ -80,7 +89,61 @@ Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 	return track_window;
 }
 
-float MeanShiftTracker::std_gaussian_1d(float x)
+float MeanShiftTracker::scotts_factor(int N,int dims)
 {
-	return exp(-0.5*pow(x,2));
+	return pow(N,-1./(dims + 4));
+}
+
+float MeanShiftTracker::kernel_value(int value, int pos,float sigma)
+{
+
+	float factor = 2*sigma*pow(h,2);
+	float energy = (pos - value)*(pos - value)/factor;
+	float result = exp(-energy);
+
+	float pi = 3.141592653589793;
+	float coefficient = sqrt(2*pi*sigma)*h;
+
+	return result/coefficient;
+}
+
+void MeanShiftTracker::caculate_variance(Mat &roi, int offset_x, int offset_y)
+{
+	int w = roi.cols;
+	int h = roi.rows;
+
+	printf("w,h:%d,%d\n",w,h);
+
+	// sigma_x
+	int sum_x = 0;
+	for(int i = 0 + offset_x; i < w + offset_x; i++){
+		sum_x += i;
+	}
+
+	float mean_x = sum_x / w; 
+	printf("mean_x:%d\n",mean_x);
+
+	sigma_x = 0.0;
+	for(int i = 0 + offset_x; i < w + offset_x; i++){
+		float delta = i - mean_x;
+		sigma_x += pow(delta,2);		
+	}
+
+	sigma_x = (sigma_x*h) / (w*h-1); // h rows, w*h points
+
+	// sigma_y
+	int sum_y = 0;
+	for(int i = 0 + offset_y; i < h + offset_y; i++){
+		sum_y += i;
+	}
+
+	float mean_y = sum_y / h;
+
+	sigma_y = 0.0;
+	for(int i = 0 + offset_y; i < h + offset_y; i++){
+		float delta = i - mean_y;
+		sigma_y += pow(delta,2);		
+	}
+
+	sigma_y = (sigma_y*w) / (h*w-1); // w cols, w*h points
 }

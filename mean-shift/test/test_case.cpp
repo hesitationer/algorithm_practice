@@ -45,6 +45,8 @@ static void onMouse(int event, int x, int y, int, void*)
 
 ERIC_TEST(mean_shift, tracking)
 {
+	MeanShiftTracker t;
+
 	Mat frame;
 	Rect track_window(0,0,55,15);
 	int hsize = 16;
@@ -133,7 +135,7 @@ ERIC_TEST(mean_shift, tracking)
 				//printf("backproj: d,w,h: (%d,%d,%d)\n",backproj.dims,
 				//		   	backproj.cols,
 				//		   	backproj.rows);
-				track_window = MeanShiftTracker::MeanShift(backproj,track_window);
+				track_window = t.MeanShift(backproj,track_window);
 			}
 		}// if(!paused)
 		else if( trackObject < 0){
@@ -206,6 +208,37 @@ ERIC_TEST(mean_shift, mat_value)
 			my_mat_1.channels(),
 			my_mat_1.rows,
 			my_mat_1.cols);
+}
+
+ERIC_TEST(mean_shift, variance)
+{
+	Mat empty = Mat::zeros(24,20,CV_8UC1);
+
+	MeanShiftTracker t;
+	float s_x = 0, s_y = 0;
+	t.caculate_variance(empty, s_x, s_y);
+
+	printf("%f,%f\n",s_x,s_y);
+}
+
+ERIC_TEST(mean_shift, mat_type)
+{
+	printf("%d\n",CV_8UC1);
+	printf("%d\n",CV_8UC2);
+	printf("%d\n",CV_8UC3);
+	printf("%d\n",CV_8UC4);
+
+
+	printf("%d\n",CV_8SC1);
+	printf("%d\n",CV_8SC2);
+	printf("%d\n",CV_8SC3);
+	printf("%d\n",CV_8SC4);
+
+
+	printf("%d\n",CV_16UC1);
+	printf("%d\n",CV_16UC2);
+	printf("%d\n",CV_16UC3);
+	printf("%d\n",CV_16UC4);
 }
 
 #pragma GCC diagnostic pop

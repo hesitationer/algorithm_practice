@@ -102,6 +102,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named camshift_demo
+
+# Build rule for target.
+camshift_demo: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 camshift_demo
+.PHONY : camshift_demo
+
+# fast build rule for target.
+camshift_demo/fast:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/build
+.PHONY : camshift_demo/fast
+
+#=============================================================================
 # Target rules for targets named mean-shift
 
 # Build rule for target.
@@ -113,6 +126,30 @@ mean-shift: cmake_check_build_system
 mean-shift/fast:
 	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/build
 .PHONY : mean-shift/fast
+
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.o: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.o
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.o
+
+# target to build an object file
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.o:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.o
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.o
+
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.i: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.i
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.i
+
+# target to preprocess a source file
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.i:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.i
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.i
+
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.s: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.s
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.s
+
+# target to generate assembly for a file
+home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.s:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.s
+.PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.cpp.s
 
 home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.o: home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.cpp.o
 .PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.o
@@ -191,6 +228,7 @@ home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.o: ho
 
 # target to build an object file
 home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.o:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.o
 	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.o
 .PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.o
 
@@ -199,6 +237,7 @@ home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.i: ho
 
 # target to preprocess a source file
 home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.i:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.i
 	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.i
 .PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.i
 
@@ -207,6 +246,7 @@ home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.s: ho
 
 # target to generate assembly for a file
 home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.s:
+	$(MAKE) -f CMakeFiles/camshift_demo.dir/build.make CMakeFiles/camshift_demo.dir/home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.s
 	$(MAKE) -f CMakeFiles/mean-shift.dir/build.make CMakeFiles/mean-shift.dir/home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.s
 .PHONY : home/eric/work-eric/ndk_proj/v4l2_demo/v4l2_demo/jni/src/pick_up_test_case.cpp.s
 
@@ -216,9 +256,13 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... camshift_demo"
 	@echo "... edit_cache"
 	@echo "... mean-shift"
 	@echo "... rebuild_cache"
+	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.o"
+	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.i"
+	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/camshiftdemo.s"
 	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.o"
 	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.i"
 	@echo "... home/eric/work-eric/ndk_proj/v4l2_demo/mean-shift/src/mean_shift.s"
