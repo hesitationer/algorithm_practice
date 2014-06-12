@@ -2,53 +2,38 @@ import numpy as np
 
 def q_sort(obj,l,r):
 	if l < r:
-		pivot = wiki_partion(obj,l,r)
-		#pivot = my_partion(obj,l,r)
+		#pivot = wiki_partion(obj,l,r)
+		pivot = my_partion(obj,l,r)
 		q_sort(obj,l,pivot - 1)
 		q_sort(obj,pivot+1,r)
 
 def my_partion(obj,l,r):
-	N = r - l + 1
-	pivot = N/2
+	# store the l
+	temp = obj[l]
 
-	if N <= 2:
-		return pivot
+	i = l
+	j = r
 
-	# swap pivot to r
-	temp = obj[pivot];obj[pivot] = obj[r]; obj[r] = temp
-
-	high = r - 1
-	while True:
+	while i != j:
 		# find the place to swap
-		while obj[l] < obj[pivot]:
-			print 'high', high
-			print 'l',l
-			print 'pivot',pivot
-			if (high - l) == 1:
-				break
-			l = l + 1
-		while obj[high] >= obj[pivot]:
-			print 'high', high
-			print 'l',    l
-			print 'pivot',pivot
-			if (high - l) == 1:
-				break
-			high = high - 1
 
-		# l / r meets ?
-		if high - l == 1:
-			temp = obj[r];obj[r] = obj[high]; obj[high] = temp
-			pivot = high
-			break
-		else:
-			# swap l <--> r
-			temp = obj[l]
-			obj[l] = obj[high]
-			obj[high] = temp
+		# first r---->l
+		while obj[j] >= temp and i < j:
+			j = j - 1
+		if i < j:
+			obj[i] = obj[j]
+			i = i + 1
 
-	print '---------------\n'
+		# then l----->r
+		while obj[i] < temp and i < j:
+			i = i + 1
+		if i < j:
+			obj[j] = obj[i]
+			j = j - 1
 
-	return pivot
+	obj[i] = temp
+
+	return i
 
 def wiki_partion(obj,l,r):
 	N = r - l + 1
