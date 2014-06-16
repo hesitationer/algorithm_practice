@@ -194,20 +194,32 @@ ERIC_TEST(mean_shift, mat_ptr)
 
 ERIC_TEST(mean_shift, mat_value)
 {
-	Mat my_mat_1(Size(3,3),CV_8UC1);
-	Mat my_mat_3(Size(3,3),CV_8UC3);
+	Mat my_mat_1(Size(3,4),CV_8UC1);
+	Mat my_mat_3(Size(3,5),CV_8UC3);
 
 	int count = 0;
-	for(int i = 0; i < 3; ++i){
-		for(int j = 0; j < 3; ++j){
+	for(int i = 0; i < my_mat_1.rows; ++i){
+		for(int j = 0; j < my_mat_1.cols; ++j){
 			*my_mat_1.ptr(i,j) = count++;
 		}
+	}
+
+	for(int i = 0; i < my_mat_1.rows; ++i){
+		for(int j = 0; j < my_mat_1.cols; ++j){
+			printf("%d ", *my_mat_1.ptr(i,j));
+		}
+		printf("\n");
 	}
 
 	printf("(dims,channels,rows,cols):%d,%d,%d,%d\n",my_mat_1.dims,
 			my_mat_1.channels(),
 			my_mat_1.rows,
 			my_mat_1.cols);
+
+	printf("(dims,channels,rows,cols):%d,%d,%d,%d\n",my_mat_1.dims,
+			my_mat_3.channels(),
+			my_mat_3.rows,
+			my_mat_3.cols);
 }
 
 ERIC_TEST(mean_shift, variance)
@@ -219,6 +231,28 @@ ERIC_TEST(mean_shift, variance)
 	t.caculate_variance(empty, s_x, s_y);
 
 	printf("%f,%f\n",s_x,s_y);
+}
+
+ERIC_TEST(mean_shift,weighted_variance)
+{
+	Mat diag_mat = Mat::zeros(5,6,CV_8UC1);
+
+	int w = diag_mat.cols;
+	int h = diag_mat.rows;
+
+	for(int i = 0; i < h; ++i){
+		for(int j = 0; j < w; ++j){
+			if((rand() % 20) > 10){
+				*diag_mat.ptr(i,j) = 1;
+			}
+			printf("%2d ", *diag_mat.ptr(i,j));
+		}
+		printf("\n");
+	}
+
+	MeanShiftTracker t;
+	t.weighted_sample_variance(diag_mat, 0, 0);
+	printf("s_x,s_y:%f,%f\n",t.sigma_x,t.sigma_y);// compare with the result of np.cov() :-P
 }
 
 ERIC_TEST(mean_shift, mat_type)
