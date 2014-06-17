@@ -26,5 +26,7 @@ public:
 	float sigma_y; // variance
 	bool sigma_called;
 
+	size_t non_zero_points;
+
 };
 #endif

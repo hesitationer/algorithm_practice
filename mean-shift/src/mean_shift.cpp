@@ -6,7 +6,8 @@ using namespace std;
 MeanShiftTracker::MeanShiftTracker():
 	h(0),
 	sigma_x(0),
-	sigma_y(0)
+	sigma_y(0),
+	non_zero_points(0)
 {
 }
 
@@ -15,16 +16,16 @@ Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 	int h_roi = track_window.height;
 	int w_roi = track_window.width;
 
-	h = scotts_factor(h_roi*w_roi,2);
-	weighted_sample_variance(probImg,0,0);
+	// NOTE: open following two lines if use kernel_type = 1
+	//weighted_sample_variance(probImg,0,0); // changed the value of non_zero_points
+	//h = scotts_factor(non_zero_points,1);  // calcuate x, y respectivly, so the dims is 1 
+	//printf("h is %f: \n",h);
 
 	for(int iterate_count  = 0;iterate_count<10;iterate_count++){
 
 		// relative coordinate
 		int old_x = track_window.width/2;
 		int old_y = track_window.height/2;
-
-		printf("old_x,old_y:(%d,%d)\n",old_x,old_y);
 
 		Mat roi = probImg(track_window);
 
@@ -37,8 +38,9 @@ Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 				float weight = *roi.ptr(row,col);
 				//printf("weight:%f\n",weight);
 
-				int kernel_type = 1; // 1. gaussian 2. rectagnel
+				int kernel_type = 2; // 1. gaussian 2. rectagnel
 				if(kernel_type == 1){
+
 					float kernel_value_x = kernel_value(old_x, col, sigma_x);
 					numerator_x += col*kernel_value_x*weight;
 					denominator_x +=  kernel_value_x*weight;
@@ -73,11 +75,11 @@ Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 		else{
 			kernel_y = old_y;
 		}
-		printf("kernel_x/y:(%d,%d)\n",kernel_x,kernel_y);
+		//printf("kernel_x/y:(%d,%d)\n",kernel_x,kernel_y);
 
 		int delta_x = kernel_x - old_x;
 		int delta_y = kernel_y - old_y;
-		printf("delta_x/y:(%d,%d)\n",delta_x,delta_y);
+		//printf("delta_x/y:(%d,%d)\n",delta_x,delta_y);
 
 		int n_x = track_window.x + delta_x;
 		int n_y = track_window.y + delta_y;
@@ -182,7 +184,7 @@ void MeanShiftTracker::weighted_sample_variance(Mat &roi, int offset_x, int offs
 
 	float sum_x = 0.0;
 	float sum_y = 0.0;
-	size_t non_zero_points = 0;
+	non_zero_points = 0;
 
 	for(int i = 0; i < h; ++i){
 		for(int j = 0; j < w; ++j){

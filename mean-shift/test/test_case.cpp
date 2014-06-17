@@ -52,9 +52,10 @@ ERIC_TEST(mean_shift, tracking)
 	int hsize = 16;
 	float hranges[] = {0,180};
 	const float* phranges = hranges;
-	VideoCapture capture(0);
+	//VideoCapture capture(0);
+	VideoCapture capture("../CMake/mean_shift_video.avi");
 	
-	capture.open(0);
+	//capture.open(0);
 
 	if(!capture.isOpened()){
 		printf("open camera failed!\n");
@@ -132,10 +133,12 @@ ERIC_TEST(mean_shift, tracking)
 				imshow("backproj",backproj);
 
 				// mean-shift
-				//printf("backproj: d,w,h: (%d,%d,%d)\n",backproj.dims,
-				//		   	backproj.cols,
-				//		   	backproj.rows);
+				
+				clock_t start, end;
+				start = clock();
 				track_window = t.MeanShift(backproj,track_window);
+				end = clock();
+				printf("mean-shift time:%f[ms]\n",(float)(end - start)*1000/CLOCKS_PER_SEC);
 			}
 		}// if(!paused)
 		else if( trackObject < 0){
@@ -153,6 +156,9 @@ ERIC_TEST(mean_shift, tracking)
 		char c = waitKey(33);
 		if(c == 27){
 			break;
+		}
+		if(c == 'p'){
+			paused = !paused;
 		}
 
 	}// while(1)
@@ -273,6 +279,51 @@ ERIC_TEST(mean_shift, mat_type)
 	printf("%d\n",CV_16UC2);
 	printf("%d\n",CV_16UC3);
 	printf("%d\n",CV_16UC4);
+}
+
+ERIC_TEST(mean_shift, record_video)
+{
+	VideoCapture capture(0);
+	Mat frame;
+
+	bool record = false;
+
+	cv::VideoWriter writer;
+
+	while(1){
+		capture >> frame;
+
+		if(record){
+
+			if(! writer.isOpened()){
+
+				std::cout<<"Frame size:"<<frame.cols<<"x"<<frame.rows <<std::endl;
+
+				if(! writer.open("mean_shift_video.avi",
+							CV_FOURCC('X','V','I','D'),
+							25,
+							frame.size()
+							)){
+
+					return;
+				}
+			}
+
+			// write
+			writer.write(frame);
+		}
+
+		imshow("frame",frame);
+
+		char c = waitKey(33);
+		if(27 == c){
+			break;
+		}
+		else if('s' == c){
+			record = !record;
+		}
+
+	}
 }
 
 #pragma GCC diagnostic pop
