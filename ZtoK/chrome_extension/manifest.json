@@ -1,0 +1,21 @@
+{
+	"manifest_version":2,
+
+	"name": "ZtoK",   
+	"version": "0.1", 
+	"description": "保存知乎答案为Mobi格式",
+	"background": { "scripts": ["background.js"] },
+	"options_page": "preview.html",
+	"browser_action": {
+		"default_icon": "icon_128.png",     
+		"default_popup": "popup.html"           
+	},
+	"icons": {
+		"16" : "19.png",
+		"128": "icon_128.png"
+	},
+	"permissions": [ 
+		"tabs","<all_urls>",
+		"http://www.my_SAE.net/"
+		] 
+}

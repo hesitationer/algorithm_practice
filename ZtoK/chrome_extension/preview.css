@@ -1,0 +1,21 @@
+body{
+  %color: blue;
+  font-size:35px;
+  %display: block;
+  %position: absolute;
+  %text-align: center;
+  }
+  #main{
+  	%text-align: center;
+ width:800px; 
+ margin:0 auto;
+  }
+  #button_div{
+	position: relative;
+	left: 1300px;
+	bottom: 650px;  
+  }
+  #call_python{
+  	width: 20em;  
+	height: 14em;
+  }
