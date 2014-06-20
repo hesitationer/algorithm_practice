@@ -1,3 +1,18 @@
+document.addEventListener('DOMContentLoaded', function () {
+	var data = chrome.extension.getBackgroundPage().articleData;
+	if(data.error){
+		//$("#message").text(data.error);
+		//$("#content").hide();
+		$("#no").text("change");
+        alert('data error!');
+	}else{
+		$("#item1").text(data.title);
+		$("#item2").text(data.type);
+		$("#item3").text(data.url);
+		$("#item4").text(data.firstAccess);
+	}
+});
+
 function openOptions() {
 	//alert('open option page');
 	//window.close()

@@ -21,13 +21,13 @@ chrome.tabs.onUpdated.addListener(checkForValidUrl);
 var articleData = {};
 articleData.error = "加载中...";
 chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
-	if(request.type!=="cnblog-article-information")
+	if(request.type!=="ZhiHu-article-information")
 		return;
 	articleData = request;
 	articleData.firstAccess = "获取中...";
 	if(!articleData.error){
 		$.ajax({
-			url: "http://localhost/first_access.php",
+            url: "http://localhost:8080",
 			cache: false,
 			type: "POST",
 			data: JSON.stringify({url:articleData.url}),

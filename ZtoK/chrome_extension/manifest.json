@@ -4,18 +4,33 @@
 	"name": "ZtoK",   
 	"version": "0.1", 
 	"description": "保存知乎答案为Mobi格式",
-	"background": { "scripts": ["background.js"] },
+	"background": { "scripts": ["jquery-2.0.0.min.js","background.js"] },
 	"options_page": "preview.html",
-	"browser_action": {
-		"default_icon": "icon_128.png",     
-		"default_popup": "popup.html"           
+	//"browser_action": {
+//		"default_icon": "icon_128.png",     
+//		"default_popup": "popup.html"           
+//	},
+    "page_action": {
+        "default_icon": {
+            "19": "19.png",
+            "38": "icon_128.png"
+        },
+        "default_title": "ZtoK", // shown in tooltip
+        "default_popup": "popup.html"
 	},
+
 	"icons": {
 		"16" : "19.png",
 		"128": "icon_128.png"
 	},
 	"permissions": [ 
 		"tabs","<all_urls>",
-		"http://www.my_SAE.net/"
-		] 
+		"http://ztok.sinaapp.com/",
+		"http://localhost:8080/"
+		],
+    "content_scripts":[{
+		"matches":["http://www.zhihu.com/*"],
+		"js":["jquery-2.0.0.min.js", "content_script.js"]
+	}]
+
 }
