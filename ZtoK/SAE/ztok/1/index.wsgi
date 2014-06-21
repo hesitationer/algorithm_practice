@@ -3,6 +3,14 @@ from cgi import parse_qs, escape
 import json
 import sae
 
+# import ZtoK module
+import sys
+sys.path.insert(0,"../../../src")
+import ZtoK
+
+#for debug
+import time
+
 html = """ 
 <html> 
 <body> 
@@ -47,18 +55,26 @@ def get_input_post(environ, start_response):
       request_body_size = 0  
   
    request_body = environ['wsgi.input'].read(request_body_size)  
-   d = parse_qs(request_body)  
+   args_dict_t =  json.loads(request_body)
       
    # In this idiom you must issue a list containing a default value.  
-   url = d.get('url', [''])[0] # Returns the first url value.  
+   url = args_dict_t['url'] # Returns the first url value.  
   
    # Always escape user input to avoid script injection  
    url = escape(url)
+
+   # process by ZtoK.py
+   result =  ZtoK.get_authors(url)
   
-   #response_body = html % (url or 'Empty',  
-   #            ', '.join(hobbies or ['No Hobbies']))  
-   response_body = url
-   response_body = json.dumps({ 'firstAccess': "2014-06-06" })
+   #result = dict()
+   #result['firstAccess'] = url
+
+   print 'resulttype',type(result)
+   print result
+   print result[0]
+   #print type({ 'firstAccess': "2014-06-06" })
+   response_body = json.dumps(result)
+   print type(response_body)
    
 
    status = '200 OK'  
@@ -68,6 +84,8 @@ def get_input_post(environ, start_response):
                   ('Content-Length', str(len(response_body)))]  
    start_response(status, response_headers)  
   
+   #print type([response_body])
+   print time.asctime( time.localtime(time.time()))
    return [response_body]  
 
 def app(environ, start_response):

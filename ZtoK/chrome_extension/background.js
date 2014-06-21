@@ -25,6 +25,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 		return;
 	articleData = request;
 	articleData.firstAccess = "获取中...";
+	articleData.authors = {};
 	if(!articleData.error){
 		$.ajax({
             url: "http://localhost:8080",
@@ -34,9 +35,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 			dataType: "json"
 		}).done(function(msg) {
 			if(msg.error){
-				articleData.firstAccess = msg.error;
+				articleData.authors = msg.error;
 			} else {
-				articleData.firstAccess = msg.firstAccess;
+				articleData.authors = msg;
 			}
 		}).fail(function(jqXHR, textStatus) {
 			articleData.firstAccess = textStatus;

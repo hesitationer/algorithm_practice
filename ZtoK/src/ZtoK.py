@@ -79,47 +79,61 @@ def generate_new_doc(question,answer):
 	new_doc.write(answer.prettify())
 	new_doc.close()
 
-url = "/home/eric/Documents/xueyayang.github.io/_posts/2014-06-17-zhihuTest.html"
 
+
+def ZtoK(z_url):
+	print "not implement yet"
+
+"""
+This two belowing url used for test in development
 Zurl = "http://www.zhihu.com/question/22001726"
-Zpage = urllib2.urlopen(Zurl)
+Zurl = "http://www.zhihu.com/question/20459385"
+"""
+global soup  #I don't want this global variants too, trust me.
+def get_authors(z_url):
+	global soup
+	Zurl = z_url
+	Zpage = urllib2.urlopen(Zurl)
 
-soup = BeautifulSoup(Zpage)
+	soup = BeautifulSoup(Zpage)
 
-# find answer-owners
-head = soup.find_all("div","zm-item-answer-author-info")
-Num = 0
-for i in head: #all the divs of 'zm-item-answer-author-info'
-	Num = Num + 1
-	for j in i.children: # children in divs
-		if isinstance(j,Tag):
-			if j.name == 'h3': # h3-tag
-				for k in j.children:
-					if isinstance(k,Tag):# 
-						if k.name == 'a' and not k.has_attr('class'):# user-link
-							print Num, ":",
-							print k.string
-							find_user = True;break
-					if isinstance(k,NavigableString):
-						if unicode(k).find(u'知乎用户') > 0: # k contains '知乎用户'
-							print Num, ":",
-							print "未知用户"
+	author_list = list()
+	# find answer-owners
+	head = soup.find_all("div","zm-item-answer-author-info")
+	Num = 0
+	for i in head: #all the divs of 'zm-item-answer-author-info'
+		Num = Num + 1
+		for j in i.children: # children in divs
+			if isinstance(j,Tag):
+				if j.name == 'h3': # h3-tag
+					for k in j.children:
+						if isinstance(k,Tag):# 
+							if k.name == 'a' and not k.has_attr('class'):# user-link
+								print Num, ":",
+								print k.string;author_list.append(k.string)
+								break
+						if isinstance(k,NavigableString):
+							if unicode(k).find(u'知乎用户') > 0: # k contains '知乎用户'
+								print Num, ":",
+								print "未知用户";author_list.append("未知用户")
 
-answer_choosed = 2
+	return author_list
 
-# find answers
-answers = soup.find_all("div","fixed-summary zm-editable-content clearfix")
-i = 0
-for a in answers:
-	i = i + 1
-	if i == answer_choosed:
-		print type(a)
-		a = process_img_path(a) # NOTE: a changes from `tag` to `soup`
-		print type(a)
-		#print a.prettify()
-		generate_new_doc('new_doc',a)
+def get_answers(answer_choosed):
+	global soup
 
-		#f = open('inplace.html','w+');
-		#f.write(a.prettify())
-		#f.close()
+	# find answers
+	answers = soup.find_all("div","fixed-summary zm-editable-content clearfix")
+	i = 0
+	for a in answers:
+		i = i + 1
+		if i == answer_choosed:
+			print type(a)
+			a = process_img_path(a) # NOTE: a changes from `tag` to `soup`
+			print type(a)
+			#print a.prettify()
+			generate_new_doc('new_doc',a)
 
+if __name__=="__main__":
+	get_authors("http://www.zhihu.com/question/20459385");
+	get_answers(3);

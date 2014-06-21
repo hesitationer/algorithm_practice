@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
 		$("#no").text("change");
         alert('data error!');
 	}else{
-		$("#item1").text(data.title);
-		$("#item2").text(data.type);
-		$("#item3").text(data.url);
-		$("#item4").text(data.firstAccess);
+
+		for(var i = 1; i < data.authors.length; i++){
+			$("#author_list").append('<li><nobr><input type=checkbox id=cb'+ i + '>'+ data.authors[i] + '</nobr></li>');
+		}
 	}
 });
 
