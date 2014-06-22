@@ -45,3 +45,23 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 	}
 });
 
+function send_choosed_in_bg(choosed_id){
+
+	var result = {};
+	// send id to the server
+	$.ajax({
+		url: "http://localhost:8080",
+		cache: false,
+		type: "POST",
+		data: JSON.stringify({id:choosed_id}),
+		dataType: "json"
+	}).done(function(msg) {
+		if(msg.error){
+			alert("msg error!");
+		} else {
+			alert(msg);
+		}
+	}).fail(function(jqXHR, textStatus) {
+		result.stat = textStatus;
+	});
+}

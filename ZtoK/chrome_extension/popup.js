@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
         alert('data error!');
 	}else{
 
-		for(var i = 1; i < data.authors.length; i++){
+		for(var i = 0; i < data.authors.length; i++){
 			$("#author_list").append('<li><nobr><input type=checkbox id=cb'+ i + '>'+ data.authors[i] + '</nobr></li>');
 		}
 	}
@@ -38,12 +38,20 @@ function openOptions() {
 	});
 }
 
+function send_choosed(){
+	// send action should be in background.js
+	var id = "hello";
+	chrome.extension.getBackgroundPage().send_choosed_in_bg(id);
+	
+}
+
 function do_sth(){
 	alert('do_sth');
 }
 
 function set_onclick(){
-	document.querySelector("#test").onclick = openOptions;
+	//document.querySelector("#test").onclick = openOptions;
+	$("#test").click(send_choosed);
 }
 
 // NOTE: window.onload is necessary. Otherwise the init() can't execute

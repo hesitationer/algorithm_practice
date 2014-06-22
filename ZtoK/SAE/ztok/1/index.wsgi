@@ -58,27 +58,30 @@ def get_input_post(environ, start_response):
    args_dict_t =  json.loads(request_body)
       
    # In this idiom you must issue a list containing a default value.  
-   url = args_dict_t['url'] # Returns the first url value.  
-  
-   # Always escape user input to avoid script injection  
-   url = escape(url)
+   key1 = "url"
+   key2 = "id"
+   if key1 in args_dict_t:
+	   url = args_dict_t['url'] # Returns the first url value.  
 
-   # process by ZtoK.py
-   result =  ZtoK.get_authors(url)
-  
-   #result = dict()
-   #result['firstAccess'] = url
+	   # Always escape user input to avoid script injection  
+	   url = escape(url)
+	   # process by ZtoK.py
+	   result =  ZtoK.get_authors(url)
 
-   print 'resulttype',type(result)
-   print result
-   print result[0]
-   #print type({ 'firstAccess': "2014-06-06" })
+   elif key2 in args_dict_t:
+	   choosed_id = args_dict_t['id']
+
+	   # Always escape user input to avoid script injection  
+	   choosed_id = escape(choosed_id)
+	   # process by ZtoK.py
+	   #result =  ZtoK.get_answers(choosed_id)
+	   result = ["fake answers"]
+   else:
+	   print "unknow args!"
+  
    response_body = json.dumps(result)
-   print type(response_body)
    
-
    status = '200 OK'  
-  
    # Now content type is text/html  
    response_headers = [('Content-Type', 'text/html'),  
                   ('Content-Length', str(len(response_body)))]  
