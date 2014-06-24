@@ -38,7 +38,7 @@ Rect MeanShiftTracker::MeanShift(Mat &probImg, Rect track_window)
 				float weight = *roi.ptr(row,col);
 				//printf("weight:%f\n",weight);
 
-				int kernel_type = 2; // 1. gaussian 2. rectagnel
+				int kernel_type = 2; // 1. gaussian 2. rectangel
 				if(kernel_type == 1){
 
 					float kernel_value_x = kernel_value(old_x, col, sigma_x);
