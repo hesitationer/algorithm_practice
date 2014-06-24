@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		//$("#message").text(data.error);
 		//$("#content").hide();
 		$("#no").text("change");
-        alert('data error!');
+        //alert('data error!');
 	}else{
 
 		for(var i = 0; i < data.authors.length; i++){
@@ -14,12 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function openOptions() {
-	//alert('open option page');
-	//window.close()
-	var url = "preview.html";
-	//if (firstTime)
-	//	url += "?firstTime=true";
-	//
+	//var url = "preview.html";
+	var url = "http://localhost:8080/static/day_of_jackal.mobi" // Good idea to download the result!!!
 	var fullUrl = chrome.extension.getURL(url);
 	chrome.tabs.getAllInWindow(null, function(tabs) {
 		for (var i in tabs) { // check if Options page is open already
@@ -45,13 +41,15 @@ function send_choosed(){
 	
 }
 
+
 function do_sth(){
 	alert('do_sth');
 }
 
 function set_onclick(){
-	//document.querySelector("#test").onclick = openOptions;
-	$("#test").click(send_choosed);
+	document.querySelector("#test").onclick = openOptions;
+	//$("#test").click(send_choosed);
+	//$("#test").click(chrome.extension.getBackgroundPage().download_from_sae_in_bg());
 }
 
 // NOTE: window.onload is necessary. Otherwise the init() can't execute
