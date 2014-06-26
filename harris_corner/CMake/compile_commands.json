@@ -1,6 +1,11 @@
 [
 {
   "directory": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake",
+  "command": "clang++    -Wall  -std=c++11 -g -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../include -I/usr/local/include -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../../unit_test_utility/include    -o CMakeFiles/cv_harris.dir/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/opencv_sample/cornerHarris_Demo.cpp.o -c /home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/opencv_sample/cornerHarris_Demo.cpp",
+  "file": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/opencv_sample/cornerHarris_Demo.cpp"
+},
+{
+  "directory": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake",
   "command": "clang++    -Wall  -std=c++11 -g -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../include -I/usr/local/include -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../../unit_test_utility/include    -o CMakeFiles/find_corners.dir/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/src/harris_corner.cpp.o -c /home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/src/harris_corner.cpp",
   "file": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/src/harris_corner.cpp"
 },
