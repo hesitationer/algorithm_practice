@@ -36,9 +36,26 @@ function openOptions() {
 
 function send_choosed(){
 	// send action should be in background.js
-	var id = "hello";
-	chrome.extension.getBackgroundPage().send_choosed_in_bg(id);
-	
+	var id = -1;
+
+	// get
+	var data = chrome.extension.getBackgroundPage().articleData;
+	for(var i = 0; i < data.authors.length; i++){
+		var cbid = "#cb" + i;
+		if($(cbid).is(":checked")) {
+			id = i;
+		};
+	}
+
+	// check
+	if(id == -1){
+		alert("unchoosed!");
+		return
+	}else{
+		//alert("U choosed  " + (id + 1));// plus one to numerate from 1
+	}
+
+	chrome.extension.getBackgroundPage().send_choosed_in_bg(id + 1);
 }
 
 
@@ -47,8 +64,8 @@ function do_sth(){
 }
 
 function set_onclick(){
-	document.querySelector("#test").onclick = openOptions;
-	//$("#test").click(send_choosed);
+	//document.querySelector("#test").onclick = openOptions;
+	$("#test").click(send_choosed);
 	//$("#test").click(chrome.extension.getBackgroundPage().download_from_sae_in_bg());
 }
 

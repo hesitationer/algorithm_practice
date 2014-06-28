@@ -72,10 +72,11 @@ def get_input_post(environ, start_response):
 	   choosed_id = args_dict_t['id']
 
 	   # Always escape user input to avoid script injection  
-	   choosed_id = escape(choosed_id)
+	   #choosed_id = escape(choosed_id)
 	   # process by ZtoK.py
-	   #result =  ZtoK.get_answers(choosed_id)
-	   result = ["fake answers"]
+	   print "get_answers  ", choosed_id
+	   result =  ZtoK.get_answers(choosed_id)
+	   #result = ["fake answers"]
    else:
 	   print "unknow args!"
   

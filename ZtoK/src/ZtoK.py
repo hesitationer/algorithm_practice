@@ -5,9 +5,14 @@ from bs4 import BeautifulSoup
 from bs4 import Tag 
 from bs4 import NavigableString
 
+import os
 import sys 
 reload(sys) 
 sys.setdefaultencoding('utf8')
+
+# call kindlegen
+from subprocess import call
+
 
 # Only test on form like this:
 #
@@ -21,7 +26,7 @@ def download_image(url):
 	data = resp.read()
 
 	jpg_name = get_jpg_name_from_url(url)
-	f = open(jpg_name,'wb')
+	f = open('output/' + jpg_name,'wb')
 	f.write(data)
 	f.close
 
@@ -62,6 +67,25 @@ def process_img_path(answer):
 
 	return soup
 
+
+"""
+This function remove the tags like this:
+	<noscript>
+		<img class="origin_image zh-lightbox-thumb"
+		data-original="http://pic2.zhimg.com/9ba57ec1d11cd202c78f1105d6ef99fe_r.jpg"
+		data-rawheight="557" data-rawwidth="876"
+		src="http://pic2.zhimg.com/9ba57ec1d11cd202c78f1105d6ef99fe_b.jpg"
+		width="876"/>
+	</noscript>
+"""
+def remove_noscript_tag(soup):
+	
+	no_script_tag = soup.find_all('noscript')
+	for i in no_script_tag:
+		i.extract()
+
+	return soup
+
 """
 This function merge the 
 	1. default_kindle.html
@@ -70,14 +94,37 @@ This function merge the
 and generate a new doc for  kindle.
 """
 def generate_new_doc(question,answer):
-	new_doc = open(question + ".html",'w+')
 
-	head_tag = BeautifulSoup(open('default_kindle.html','r')).head
+	print os.getcwd()
+
+	# open file
+	html = "output/" + question + ".html"
+	new_doc = open(html,'w+')
+
+	soup = BeautifulSoup(open('source/default_kindle.html','r'))
+
+
+	# head
+	head_tag = soup.head  
 	answer.body.insert_before(head_tag)
 
-	# set the header and css
+	# title. used by kindlegen as the meta-data
+	title_string = get_title()
+	answer.title.string = title_string
+
+	# Add <h>title</h>
+	h1 = soup.new_tag("h2")
+	h1.string = title_string
+	answer.body.contents[0].insert_before(h1)
+
+	# output
 	new_doc.write(answer.prettify())
 	new_doc.close()
+
+	# convert to mobi
+	call_kindlegen(html)
+	print "generate_new_doc done"
+
 
 
 
@@ -122,6 +169,8 @@ def get_authors(z_url):
 def get_answers(answer_choosed):
 	global soup
 
+	print "in get_answers:", answer_choosed 
+
 	# find answers
 	answers = soup.find_all("div","fixed-summary zm-editable-content clearfix")
 	i = 0
@@ -130,9 +179,38 @@ def get_answers(answer_choosed):
 		if i == answer_choosed:
 			print type(a)
 			a = process_img_path(a) # NOTE: a changes from `tag` to `soup`
+			a = remove_noscript_tag(a)
 			print type(a)
 			#print a.prettify()
-			generate_new_doc('new_doc',a)
+			title = get_title()
+			generate_new_doc(title,a)
+
+"""
+This function get the string between
+	<title>
+			这是问题的标题？ - 知乎
+	</title>
+
+And split by '？'，return the first part.
+"""
+
+def get_title():
+	global soup
+
+	title = soup.find("title")
+	t_list = title.string.strip('\n').split(u'？')
+
+	print t_list 
+	print len(t_list)
+	for i in t_list:
+		print i
+	return t_list[0]
+	
+
+def call_kindlegen(input_html):
+	print os.getcwd()
+	kindlegen = "./kindlegen/kindlegen"
+	rc = call([kindlegen, "", input_html])
 
 if __name__=="__main__":
 	get_authors("http://www.zhihu.com/question/20459385");
