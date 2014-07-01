@@ -19,7 +19,7 @@ INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/include"
 LINK_DIRECTORIES("/usr/local/lib/")
 
 FILE(GLOB SRC_FILES
-	"../src/harris_corner.cpp"
+	"../src/*.cpp"
 	"../test/*.cpp"
 	"../../unit_test_utility/src/pick_up_test_case.cpp")
 ADD_EXECUTABLE(find_corners ${SRC_FILES})
@@ -28,3 +28,6 @@ TARGET_LINK_LIBRARIES(find_corners opencv_highgui opencv_imgproc opencv_core)
 FILE(GLOB SRC_FILES "../opencv_sample/cornerHarris_Demo.cpp")
 ADD_EXECUTABLE(cv_harris ${SRC_FILES})
 TARGET_LINK_LIBRARIES(cv_harris opencv_highgui opencv_imgproc opencv_core)
+
+ADD_EXECUTABLE(sub_pixel "../opencv_sample/cornerSubPix_Demo.cpp")
+TARGET_LINK_LIBRARIES(sub_pixel opencv_highgui opencv_imgproc opencv_core)

@@ -1,10 +1,11 @@
 #include "opencv2/opencv.hpp"
 
 using namespace cv;
+using namespace std;
 
 const float quality_level = 0.1;
 
-int find_corners(Mat &image)
+int find_corners(Mat &image,std::vector<Point_<int>> &corners)
 {
 	int width = image.cols;
 	int height = image.rows;
@@ -88,6 +89,7 @@ int find_corners(Mat &image)
 			int value = (int)norm_corner_map.at<float>(i,j);
 			if(value > 160){
 				circle( norm_corner_map_scaled, Point(j,i), 5, CV_RGB(0,255,0), 2, 8, 0 );			
+				corners.push_back(Point(j,i));
 			}
 		}
 	}

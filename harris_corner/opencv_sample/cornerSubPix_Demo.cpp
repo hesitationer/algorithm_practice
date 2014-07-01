@@ -83,8 +83,15 @@ void goodFeaturesToTrack_Demo( int, void* )
   /// Draw corners detected
   cout<<"** Number of corners detected: "<<corners.size()<<endl;
   int r = 4;
-  for( size_t i = 0; i < corners.size(); i++ )
-     { circle( copy, corners[i], r, Scalar(rng.uniform(0,255), rng.uniform(0,255), rng.uniform(0,255)), -1, 8, 0 ); }
+  for( size_t i = 0; i < corners.size(); i++ ){
+	  circle( copy, corners[i],
+			  r,
+			  Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255)),
+			  -1,
+			  8,
+			  0 ); 
+	  cout<<" -- raw Corner ["<<i<<"]  ("<<corners[i].x<<","<<corners[i].y<<")"<<endl; 
+  }
 
   /// Show what you got
   namedWindow( source_window, WINDOW_AUTOSIZE );
@@ -100,5 +107,5 @@ void goodFeaturesToTrack_Demo( int, void* )
 
   /// Write them down
   for( size_t i = 0; i < corners.size(); i++ )
-     { cout<<" -- Refined Corner ["<<i<<"]  ("<<corners[i].x<<","<<corners[i].y<<")"<<endl; }
+  { cout<<" -- Refined Corner ["<<i<<"]  ("<<corners[i].x<<","<<corners[i].y<<")"<<endl; }
 }

@@ -3,7 +3,8 @@
 
 using namespace cv;
 
-extern int find_corners(Mat &image);
+extern int find_corners(Mat &image,std::vector<Point_<int>> &corners);
+extern Point_<float> find_subpixels(Mat &src, Mat &image,Point_<int> raw_pt);
 
 ERIC_TEST(harris_corners, find_corners)
 {
@@ -13,7 +14,34 @@ ERIC_TEST(harris_corners, find_corners)
 	//imshow("corner",image);
 	
 	//waitKey(0);
-	find_corners(image);
+	std::vector<Point_<int>> corners;
+	find_corners(image,corners);
+}
+
+
+ERIC_TEST(harris_corners,sub_pixel)
+{
+	Mat src = imread("../test/corners.bmp");
+	Mat gray_src;
+    cvtColor(src,gray_src,COLOR_BGR2GRAY);	 
+
+	// Expecte output: refine points: (188.921,115.613)
+	// Result from opencv demo
+	//** Number of corners detected: 10
+	// -- raw Corner [0]  (189,115)  	-- Refined Corner [0]  (188.921,115.613)
+	// -- raw Corner [1]  (220,62)      -- Refined Corner [1]  (219.417,61.4548)
+	// -- raw Corner [2]  (62,60)       -- Refined Corner [2]  (62.5,61.1851)
+	// -- raw Corner [3]  (187,220)     -- Refined Corner [3]  (187.542,219.248)
+	// -- raw Corner [4]  (285,54)      -- Refined Corner [4]  (284.877,53.9455)
+	// -- raw Corner [5]  (211,221)     -- Refined Corner [5]  (212.14,219.474)
+	// -- raw Corner [6]  (236,89)      -- Refined Corner [6]  (233.958,92.8847)
+	// -- raw Corner [7]  (242,39)      -- Refined Corner [7]  (242.486,39.273)
+	// -- raw Corner [8]  (275,81)      -- Refined Corner [8]  (275.117,80.059)
+	// -- raw Corner [9]  (49,75)       -- Refined Corner [9]  (47.0021,75.8706)
+	// 
+	// 
+	find_subpixels(src,gray_src,Point_<int>(242,39));
+
 }
 
 ERIC_TEST(harris_corners, float_mat)
@@ -55,4 +83,11 @@ ERIC_TEST(harris_corners, operators_order)
 	a += 5 - 4; // after executing, a is 2
 
 	printf("a is:%d\n",a);
+}
+
+ERIC_TEST(harris_corners, float_notation)
+{
+	float a = 0.,b = .1,c=1e-6;
+	printf("a is: %f, \n b is : %f \n", a,b);
+	printf("c is: %f\n",c);
 }
