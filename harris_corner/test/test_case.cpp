@@ -40,7 +40,7 @@ ERIC_TEST(harris_corners,sub_pixel)
 	// -- raw Corner [9]  (49,75)       -- Refined Corner [9]  (47.0021,75.8706)
 	// 
 	// 
-	find_subpixels(src,gray_src,Point_<int>(242,39));
+	find_subpixels(src,gray_src,Point_<int>(62,60));
 
 }
 
@@ -90,4 +90,9 @@ ERIC_TEST(harris_corners, float_notation)
 	float a = 0.,b = .1,c=1e-6;
 	printf("a is: %f, \n b is : %f \n", a,b);
 	printf("c is: %f\n",c);
+
+	Point_<float> p;
+	p.x = 111.11;
+	p.y = 222.22;
+	printf("p.x is %f, (int)p.y is %d\n",p.x,(int)p.y);
 }

@@ -16,7 +16,7 @@ INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/include"
 	"/usr/local/include"
 	"../../unit_test_utility/include")
 
-LINK_DIRECTORIES("/usr/local/lib/")
+LINK_DIRECTORIES("/home/eric/Downloads/opencv-2.4.9/eric_build/lib")
 
 FILE(GLOB SRC_FILES
 	"../src/*.cpp"

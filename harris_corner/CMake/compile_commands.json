@@ -11,6 +11,11 @@
 },
 {
   "directory": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake",
+  "command": "clang++    -Wall  -std=c++11 -g -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../include -I/usr/local/include -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../../unit_test_utility/include    -o CMakeFiles/find_corners.dir/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/src/find_subpixels.cpp.o -c /home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/src/find_subpixels.cpp",
+  "file": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/src/find_subpixels.cpp"
+},
+{
+  "directory": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake",
   "command": "clang++    -Wall  -std=c++11 -g -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../include -I/usr/local/include -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../../unit_test_utility/include    -o CMakeFiles/find_corners.dir/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/test/test_case.cpp.o -c /home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/test/test_case.cpp",
   "file": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/test/test_case.cpp"
 },
@@ -23,5 +28,10 @@
   "directory": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake",
   "command": "clang++    -Wall  -std=c++11 -g -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../include -I/usr/local/include -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../../unit_test_utility/include    -o CMakeFiles/find_corners.dir/home/eric/work-eric/ndk_proj/v4l2_demo/unit_test_utility/src/pick_up_test_case.cpp.o -c /home/eric/work-eric/ndk_proj/v4l2_demo/unit_test_utility/src/pick_up_test_case.cpp",
   "file": "/home/eric/work-eric/ndk_proj/v4l2_demo/unit_test_utility/src/pick_up_test_case.cpp"
+},
+{
+  "directory": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake",
+  "command": "clang++    -Wall  -std=c++11 -g -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../include -I/usr/local/include -I/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/CMake/../../unit_test_utility/include    -o CMakeFiles/sub_pixel.dir/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/opencv_sample/cornerSubPix_Demo.cpp.o -c /home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/opencv_sample/cornerSubPix_Demo.cpp",
+  "file": "/home/eric/work-eric/ndk_proj/v4l2_demo/harris_corner/opencv_sample/cornerSubPix_Demo.cpp"
 }
 ]
