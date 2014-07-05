@@ -6,6 +6,7 @@ else{
 	var msg = {
 		type: "ZhiHu-article-information",
 		title : "this is title",
+		downloadpath: "null",
 		url: document.URL
 	};
 	chrome.runtime.sendMessage(msg);

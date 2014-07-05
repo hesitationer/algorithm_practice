@@ -13,26 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 });
 
-function openOptions() {
-	//var url = "preview.html";
-	var url = "http://localhost:8080/static/day_of_jackal.mobi" // Good idea to download the result!!!
-	var fullUrl = chrome.extension.getURL(url);
-	chrome.tabs.getAllInWindow(null, function(tabs) {
-		for (var i in tabs) { // check if Options page is open already
-			var tab = tabs[i];
-			if (tab.url == fullUrl) {
-				chrome.tabs.update(tab.id, { selected: true }); // select the tab
-				return;
-			}
-		}
-		chrome.tabs.getSelected(null, function(tab) { // open a new tab next to currently selected tab
-			chrome.tabs.create({
-				url: url,
-				index: tab.index + 1
-			});
-		});
-	});
-}
 
 function send_choosed(){
 	// send action should be in background.js
@@ -59,14 +39,8 @@ function send_choosed(){
 }
 
 
-function do_sth(){
-	alert('do_sth');
-}
-
 function set_onclick(){
-	//document.querySelector("#test").onclick = openOptions;
 	$("#test").click(send_choosed);
-	//$("#test").click(chrome.extension.getBackgroundPage().download_from_sae_in_bg());
 }
 
 // NOTE: window.onload is necessary. Otherwise the init() can't execute
