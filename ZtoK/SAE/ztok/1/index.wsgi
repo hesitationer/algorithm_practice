@@ -4,8 +4,8 @@ import json
 import sae
 
 # import ZtoK module
-import sys
-sys.path.insert(0,"../../../src")
+#import sys
+#sys.path.insert(0,"../../../src")
 import ZtoK
 
 #for debug
@@ -45,7 +45,8 @@ def get_request_args(environ, start_response):
     #return ['from server']
     return url
 
-
+#Download_URL = "http://ztok.sinaapp.com/static/"
+Download_URL = "http://localhost:8080/static/"
 def get_input_post(environ, start_response):  
   
    # the environment variable CONTENT_LENGTH may be empty or missing  
@@ -53,7 +54,13 @@ def get_input_post(environ, start_response):
       request_body_size = int(environ.get('CONTENT_LENGTH', 0))  
    except (ValueError):  
       request_body_size = 0  
-  
+      print "Eric say:\n illegal request!\n"
+
+      status = '200 OK'  
+      response_headers = [('Content-type', 'text/plain')]
+      start_response(status, response_headers)  
+      return ["Eric say:\n illegal request!\n"]
+
    request_body = environ['wsgi.input'].read(request_body_size)  
    args_dict_t =  json.loads(request_body)
       
@@ -61,24 +68,28 @@ def get_input_post(environ, start_response):
    key1 = "url"
    key2 = "id"
    if key1 in args_dict_t:
-	   url = args_dict_t['url'] # Returns the first url value.  
+       url = args_dict_t['url'] # Returns the first url value.  
 
-	   # Always escape user input to avoid script injection  
-	   url = escape(url)
-	   # process by ZtoK.py
-	   result =  ZtoK.get_authors(url)
+       # Always escape user input to avoid script injection  
+       url = escape(url)
+       # process by ZtoK.py
+       result =  ZtoK.get_authors(url)
 
    elif key2 in args_dict_t:
-	   choosed_id = args_dict_t['id']
+       choosed_id = args_dict_t['id']
 
-	   # Always escape user input to avoid script injection  
-	   #choosed_id = escape(choosed_id)
-	   # process by ZtoK.py
-	   print "get_answers  ", choosed_id
-	   result =  ZtoK.get_answers(choosed_id)
-	   #result = ["fake answers"]
+       # Always escape user input to avoid script injection  
+       #choosed_id = escape(choosed_id)
+       # process by ZtoK.py
+       print "get_answers  ", choosed_id
+       mobi = ZtoK.get_answers(choosed_id)
+       print type(Download_URL)
+       print type(mobi)
+       print type("path")
+       result = {"downloadpath":Download_URL + str(mobi)} 
    else:
-	   print "unknow args!"
+       print "unknow args!"
+       return ['Eric Said:\n\tNoNo,illegal request!\n']
   
    response_body = json.dumps(result)
    

@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from bs4 import Tag 
 from bs4 import NavigableString
 
+import shutil
 import os
 import sys 
 reload(sys) 
@@ -125,6 +126,13 @@ def generate_new_doc(question,answer):
 	call_kindlegen(html)
 	print "generate_new_doc done"
 
+	# move to static dir for downloading
+	mobi = "./output/"+question+".mobi"
+	if os.path.isfile(mobi):
+		dst = "./static/"+question+".mobi"
+		shutil.copy(mobi,dst)
+		print dst
+
 
 
 
@@ -185,6 +193,8 @@ def get_answers(answer_choosed):
 			title = get_title()
 			generate_new_doc(title,a)
 
+			return title + ".mobi"
+
 """
 This function get the string between
 	<title>
@@ -204,6 +214,7 @@ def get_title():
 	print len(t_list)
 	for i in t_list:
 		print i
+
 	return t_list[0]
 	
 
