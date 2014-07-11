@@ -199,19 +199,90 @@ int search(int B_x, int B_y, // current block left_top
 	return 0;
 }
 
+typedef struct{
+	int x;
+	int y;
+}offset_t;
+
+const int SMALL_DIFF = 2;
+int blWidth = 16;
+int blHeight = 16;
+int blSize = blWidth*blHeight;
+float acceptlevel = blSize * SMALL_DIFF;
+
+void search_spiral(unsigned char* pCurrBlock, 
+				   int row, int col,
+				   int bw, int bh,
+				   unsigned char* pPrev, 
+				   int ww, int wh,
+				   int w, int h,
+				   int* tr, int *tc,
+				   offset_t *offset_table, // record the offset of point to search
+				   int table_len)// the length of offset-table
+{
+	int minDiff = 65536;
+	int step = w; // the width of image
+
+	int samePosDiff = BlockDiff(pCurrBlock, step,
+			pPrev + row*w + col, step, bw,bh);
+
+
+	int ss_count = table_len;
+	offset_t *ss = offset_table;
+
+	int countMin = 1;
+	int sumx = 0, sumy = 0;
+
+	if(samePosDiff > acceptlevel){
+
+		for(int i = 0 ; i < ss_count; i++){
+
+			int dx = ss[i].x;
+			int dy = ss[i].y;
+			int Y = row + dy;
+			int X = col + dx;
+			int diff = BlockDiff(pCurrBlock, step, 
+					pPrev+Y*step+X, step, bw, bh);
+
+			if( diff < acceptlevel )
+			{
+				sumx = dx; sumy = dy;
+				countMin = 1;
+				break;
+			}
+
+			if( diff < samePosDiff )
+			{
+				samePosDiff = diff;
+				sumx = dx; sumy = dy;
+				countMin = 1;
+			}
+			else if( diff == samePosDiff )
+			{
+				sumx += dx; sumy += dy;
+				countMin++;
+			}
+
+		}// ss_count
+	}// samePosDiff
+
+	*tc = sumx/countMin;
+	*tr = sumy/countMin;
+}
+
 int SearchDisp(unsigned char* pCurrBlock, 
-			   int row, int col,
-			   int bw, int bh,
-			   unsigned char* pPrev, 
-			   int ww, int wh,
-			   int w, int h,
-			   int* tr, int *tc)
+		int row, int col,
+		int bw, int bh,
+		unsigned char* pPrev, 
+		int ww, int wh,
+		int w, int h,
+		int* tr, int *tc)
 {
 	int minDiff = 65536;
 	for(int i=-wh/2; i<wh/2; i++){
 		for(int j=-ww/2; j<ww/2; j++){
 			int diff = BlockDiff(pCurrBlock, w, 
-				pPrev+(row+i)*w+(col+j), w, bw, bh);
+					pPrev+(row+i)*w+(col+j), w, bw, bh);
 			if(diff <= minDiff){
 				minDiff = diff;
 				*tr = i;
@@ -238,13 +309,127 @@ int integral_buffer(unsigned char *data, int *dst, int w, int h)
 		for(int j = 1; j < w; j++){
 
 			dst[i*w + j] =  data[i*w + j] + 
-							dst[i*w + (j-1)] + 
-					 		dst[(i-1)*w + j]  -
-							dst[(i-1)*w + (j-1)];
+				dst[i*w + (j-1)] + 
+				dst[(i-1)*w + j]  -
+				dst[(i-1)*w + (j-1)];
 		}
 	}
 
 	return 0;
+}
+
+void get_offset_table(int sw, // width of search region
+		int sh, // height of search region 
+		offset_t* ss)// len(ss) = (sw + 1)*(sh + 1))
+{
+	// w/h --> radius
+	sw = sw/2;
+	sh = sh/2;
+	// Calculate scanning scheme
+	int min_count = std::min(sw, sh);
+	int ss_count = 0;
+
+	// use spiral search pattern
+	//
+	//     9 10 11 12
+	//     8  1  2 13
+	//     7  *  3 14
+	//     6  5  4 15
+	//... 20 19 18 17
+	//
+
+	int i, j;
+	for( i = 0; i < min_count; i++ )
+	{
+		// four cycles along sides
+		int x = -i-1, y = x;
+
+		// upper side
+		for( j = -i; j <= i + 1; j++, ss_count++ )
+		{
+			ss[ss_count].x = ++x;
+			ss[ss_count].y = y;
+		}
+
+		// right side
+		for( j = -i; j <= i + 1; j++, ss_count++ )
+		{
+			ss[ss_count].x = x;
+			ss[ss_count].y = ++y;
+		}
+
+		// bottom side
+		for( j = -i; j <= i + 1; j++, ss_count++ )
+		{
+			ss[ss_count].x = --x;
+			ss[ss_count].y = y;
+		}
+
+		// left side
+		for( j = -i; j <= i + 1; j++, ss_count++ )
+		{
+			ss[ss_count].x = x;
+			ss[ss_count].y = --y;
+		}
+	}
+
+	// the rest part
+	if( sw < sh )
+	{
+		int xleft = -min_count;
+
+		// cycle by neighbor rings
+		for( i = min_count; i < sh; i++ )
+		{
+			// two cycles by x
+			int y = -(i + 1);
+			int x = xleft;
+
+			// upper side
+			for( j = -sw; j <= sw; j++, ss_count++, x++ )
+			{
+				ss[ss_count].x = x;
+				ss[ss_count].y = y;
+			}
+
+			x = xleft;
+			y = -y;
+			// bottom side
+			for( j = -sw; j <= sw; j++, ss_count++, x++ )
+			{
+				ss[ss_count].x = x;
+				ss[ss_count].y = y;
+			}
+		}
+	}
+	else if( sw > sh )
+	{
+		int yupper = -min_count;
+
+		// cycle by neighbor rings
+		for( i = min_count; i < sw; i++ )
+		{
+			// two cycles by y
+			int x = -(i + 1);
+			int y = yupper;
+
+			// left side
+			for( j = -sh; j <= sh; j++, ss_count++, y++ )
+			{
+				ss[ss_count].x = x;
+				ss[ss_count].y = y;
+			}
+
+			y = yupper;
+			x = -x;
+			// right side
+			for( j = -sh; j <= sh; j++, ss_count++, y++ )
+			{
+				ss[ss_count].x = x;
+				ss[ss_count].y = y;
+			}
+		}
+	}
 }
 
 int demo_main()
@@ -257,6 +442,14 @@ int demo_main()
 		return -1;
 	}
 
+
+	int bw = 16, bh = 16;
+	int ww = 48, wh = 48; // search region
+	int w = 320, h = 240;
+	int table_len = (ww + 1)*(wh + 1); // 24 -- 1 -- 24
+	offset_t *search_table = (offset_t*)malloc(table_len*sizeof(offset_t));
+	get_offset_table(ww,wh,search_table);
+
 	Mat currFrame, preFrame, tmpFrame, showFrame, subFrame;
 	clock_t start, end;
 	for(;;){
@@ -264,13 +457,10 @@ int demo_main()
 		resize(tmpFrame, showFrame, cvSize(320, 240), 0, 0, 0);
 		cvtColor(showFrame, currFrame, CV_BGR2GRAY);
 		cvtColor(showFrame, subFrame, CV_BGR2GRAY);
-		
+
 		if(preFrame.data)
 		{
 			int tr = 0, tc = 0;
-			int bw = 16, bh = 16;
-			int ww = 48, wh = 48;
-			int w = 320, h = 240;
 
 			for(int i=0; i<h; i++){
 				for(int j=0; j<w; j++){
@@ -287,18 +477,27 @@ int demo_main()
 			integral_buffer(currFrame.data,(int*)B_integral.data,w,h);
 			for(int i=wh/2; i<h-wh/2; i+=bh){
 				for(int j=ww/2; j<w-ww/2; j+=bw){
-// 					if(BlockSum(subFrame.data+i*w+j, w, bw,bh) < 5*bw*bh){
-// 						tr = 0;
-// 						tc = 0;
-// 					}else
+					// 					if(BlockSum(subFrame.data+i*w+j, w, bw,bh) < 5*bw*bh){
+					// 						tr = 0;
+					// 						tc = 0;
+					// 					}else
 					{
-						//SearchDisp(currFrame.data+i*w+j, i, j, bw, bh,
-						//	preFrame.data, ww, wh, w, h, &tr, &tc);
-						
-						search(j,i,48,48,bw,bh,&tr,&tc);
+						int use = 1;
+						if(1 == use){
+							SearchDisp(currFrame.data+i*w+j, i, j, bw, bh,
+								preFrame.data, ww, wh, w, h, &tr, &tc);
+						}
+						if(2 == use){
+							search_spiral(currFrame.data+i*w+j,i,j,bw,bh,
+									preFrame.data,ww,wh,w,h,&tr,&tc,
+									search_table,
+									table_len);
+						}
+							
+
 					}
 					line(showFrame, cvPoint(j, i), cvPoint(j+tc, i+tr),
-				    	cvScalar(0,0,255), 2, 2);
+							cvScalar(0,0,255), 2, 2);
 				}
 			}
 			//end = clock();
@@ -308,11 +507,11 @@ int demo_main()
 		}
 
 		imshow("curr", currFrame);
-		imshow("v", showFrame);
+		imshow("Z-search", showFrame);
 		imshow("sub", subFrame);
 
 		resize(currFrame, preFrame, cvSize(320, 240), 0, 0, 0);
-		char c = waitKey(300);
+		char c = waitKey(33);
 		printf("%d\n",c);
 		if(c == 27){
 			printf("break?\n");
