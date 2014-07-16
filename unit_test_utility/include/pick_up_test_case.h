@@ -1,6 +1,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+
 extern "C"
 {
 	typedef void (*test_fun)();
@@ -50,3 +53,4 @@ extern "C"
 	extern char all_case[256][64];
 	extern test_fun fun_ptr[256];
 }
+#pragma GCC diagnostic pop
