@@ -28,6 +28,7 @@ typedef struct eric_node
 {
 	node_type type;
 
+	char key[256];
 	int value;
 	//unsigned char depth;
 
@@ -41,6 +42,8 @@ class b_tree
 public:
 	b_tree();
 	~b_tree();
+
+	b_tree(const b_tree &copy);
 
 	eric_node* insert(int value);
 	int remove_back(int value);

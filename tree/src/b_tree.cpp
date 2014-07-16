@@ -22,6 +22,12 @@ b_tree::~b_tree()
 	destroy_tree_();
 }
 
+b_tree::b_tree(const b_tree &copy)
+{
+	//root = NULL;
+	root = make_node_(-1,ROOT_NODE);
+}
+
 eric_node* b_tree::insert(int value)
 {
 	eric_node* new_node = NULL;
