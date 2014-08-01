@@ -62,19 +62,19 @@ void mean_shift_seg(Mat src, Mat dst)
 		for(int j = 0; j < w; j++){
 
 			unsigned char *center = src.data + i*w*3 + j*3;
-			int sum_r = 0, sum_g = 0, sum_b = 0;
 
 			C[0] = center[0]; C[1] = center[1]; C[2] = center[2]; 
 			sx = 0, sy = 0;
 			x0 = j; y0 = i;
 			for(int iter_count = 0; iter_count < MAX_ITERATE_NUM;iter_count++)
 			{
+				int sum_r = 0, sum_g = 0, sum_b = 0;
 				int minx = (x0 - size);  minx = max(0,minx); 
 				int miny = (y0 - size);  miny = max(0,miny); 
 				int maxx = (x0 + size);  maxx = min(maxx,w-1); 
 				int maxy = (y0 + size);  maxy = min(maxy,h-1); 
 
-				int count = 0; int good_neighbors = 0;
+				int good_neighbors = 0;
 				for(int k = miny; k <= maxy; k++){
 					for(int q = minx; q <= maxx; q++){
 
@@ -113,11 +113,9 @@ void mean_shift_seg(Mat src, Mat dst)
 			// mean
 			unsigned char *dst_center = dst.data + i*w*3 + j*3;
 			dst_center[0] = C[0]; dst_center[1] = C[1]; dst_center[2] = C[2];
-
 		}
 	}// for(int i = 0; i < h; i++)
 
 	// color the result
-	floodFillPostprocess(dst,Scalar::all(2));
-
+	//floodFillPostprocess(dst,Scalar::all(2));
 }

@@ -8,6 +8,7 @@
 
 using namespace cv;
 
+
 Mat image;
 
 bool selectObject = false;
@@ -43,40 +44,9 @@ static void onMouse(int event, int x, int y, int, void*)
 	}
 }
 
-void mean_shift_seg(Mat src, Mat dst);
-ERIC_TEST(ms_seg, seg)
-{
-	Mat src = imread("../CMake/fruits.jpg");
-	Mat dst = Mat::zeros(src.rows, src.cols, CV_8UC3);
-
-	mean_shift_seg(src,dst);
 
 
-	imshow("dst",dst);
-	imshow("src",src);
-	waitKey(0);
-}
 
-ERIC_TEST(ms_seg, mat_3c_visit)
-{
-	Mat mat3c = Mat::zeros(4,4,CV_8UC3);
-
-	int step = 3*4;
-	*(mat3c.data + 2*step + 2*3 + 0) = 1;
-	*(mat3c.data + 2*step + 2*3 + 1) = 11;
-	*(mat3c.data + 2*step + 2*3 + 2) = 111;
-
-	for(int i = 0; i < 4; i++){
-		for(int j = 0; j < 4; j++){
-
-			printf("(%d,%d,%d) ",*(mat3c.data + i*4*3 + j*3 + 0),
-								 *(mat3c.data + i*4*3 + j*3 + 1),
-								 *(mat3c.data + i*4*3 + j*3 + 2)
-					);
-		}
-		printf("\n");
-	}
-}
 
 ERIC_TEST(mean_shift, tracking)
 {

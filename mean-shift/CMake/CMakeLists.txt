@@ -5,11 +5,12 @@ SET(PROJECT_ROOT_PATH "../")
 SET(EXECUTABLE_OUTPUT_PATH "${PROJECT_ROOT_PATH}/bin")
 SET(LIBRARY_OUTPUT_PATH "${PROJECT_ROOT_PATH}/lib")
 
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 SET(CMAKE_CXX_COMPILER "clang++")
 #SET(CMAKE_CXX_FLAGS "--analyze")
 SET(CMAKE_CXX_FLAGS "-Wall  -std=c++11")
 
-SET(CMAKE_BUILD_TYPE "Release")
+SET(CMAKE_BUILD_TYPE "Debug")
 
 INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/include"
 	"/usr/local/include"
@@ -22,6 +23,7 @@ LINK_DIRECTORIES("~/Documents/opencv_lib_build_by_eric/Release/lib")
 FILE(GLOB SRC_FILES
 	"../src/mean_shift.cpp"
 	"../src/ms_seg.cpp"
+	"../test/pyrMSseg_case.cpp"
 	"../test/test_case.cpp"
 	"../test/test_main.cpp"
 	"../../unit_test_utility/src/pick_up_test_case.cpp")
