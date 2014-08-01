@@ -6,6 +6,7 @@
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
+void floodFillPostprocess( Mat& img, const Scalar& colorDiff=Scalar::all(1) );
 void mean_shift_seg(Mat src, Mat dst);
 
 class my_class{
@@ -85,62 +86,58 @@ ERIC_TEST(seg, mask)
 	pyrUp(half_dst,src_dst,src.size());
 
 	// mask
-//	uchar *mask = 0;
-//	Mat mask0 = Mat::zeros(src.rows,src.cols,CV_8UC1);
-//	Mat m(src.rows,src.cols,CV_8UC1,mask0.data);
-//	uchar *dptr = half_dst.data + (int)half_dst.step + 3;
-//	int mstep = (int)m.step;
-//	int dstep = (int)half.step;
-//	mask = m.data + mstep;
-//	m.setTo(Scalar::all(0));
-//
-//	int tab[768];
-//	for(int i = 0; i < 768; i++){
-//		tab[i] = (i-255)*(i-255);
-//	}
-//	int isr22 = 20*20;
-//#define cdiff(ofs0) (tab[c0-dptr[ofs0]+255] + \
-//		tab[c1-dptr[(ofs0)+1]+255] + tab[c2-dptr[(ofs0)+2]+255] >= isr22)
-//
-//	for(int i = 1; i < half.rows - 1; ++i){
-//		for(int j = 1; j < half.cols - 1; ++j){
-//
-//			int c0 = dptr[0],c1= dptr[1], c2 = dptr[2];
-//			mask[j*2 - 1] = cdiff(-3) || cdiff(3) || cdiff(-dstep-3) || cdiff(-dstep) ||
-//				cdiff(-dstep+3) || cdiff(dstep-3) || cdiff(dstep) || cdiff(dstep+3);
-//
-//			// move ptr
-//			dptr += 3;
-//
-//		}
-//
-//		dptr += (int)half_dst.step - (half_dst.cols - 2)*3;
-//		mask += mstep*2;
-//	}
-//
-//	// dialate
-//	dilate(m,m,cv::Mat());
-//	mask = m.data; // rest to start
-//
-//	
-//	// full 
-//	Mat src_final_dst = Mat::zeros(src.rows,src.cols,src.type());
-//	mean_shift_seg(src_dst,src_final_dst);
-//
+	Mat mask0 = Mat::zeros(src.rows,src.cols,CV_8UC1);
+	Mat m(src.rows,src.cols,CV_8UC1,mask0.data);
+
+	uchar *dptr = half_dst.data + (int)half_dst.step + 3; //处理后小图
+	int mstep = (int)m.step; //原图mask的宽度
+	int dstep = (int)half.step; // 小图的宽度
+
+	uchar *mask = 0;
+	mask = m.data + mstep; // 指向矩阵m，与mask0共享data内存
+	m.setTo(Scalar::all(0));
+
+	int tab[768];
+	for(int i = 0; i < 768; i++){
+		tab[i] = (i-255)*(i-255);
+	}
+	int isr22 = 20*20;
+#define cdiff(ofs0) (tab[c0-dptr[ofs0]+255] + \
+		tab[c1-dptr[(ofs0)+1]+255] + tab[c2-dptr[(ofs0)+2]+255] >= isr22)
+
+	for(int i = 1; i < half.rows - 1; ++i){
+		for(int j = 1; j < half.cols - 1; ++j){
+
+			int c0 = dptr[0],c1= dptr[1], c2 = dptr[2];
+			mask[j*2 - 1] = cdiff(-3) || cdiff(3) || cdiff(-dstep-3) || cdiff(-dstep) ||
+				cdiff(-dstep+3) || cdiff(dstep-3) || cdiff(dstep) || cdiff(dstep+3);
+
+			// move ptr
+			dptr += 3;
+
+		}
+		dptr += (int)half_dst.step - (half_dst.cols - 2)*3; //减去2，是左右各省去一列。乘以3，是通道。
+		mask += mstep*2;
+	}
+
+	// dialate
+	dilate(m,m,cv::Mat());
+	mask = m.data; // rest to start
+
+	
+	// full 
+	Mat src_final_dst = Mat::zeros(src.rows,src.cols,src.type());
+	mean_shift_seg(src_dst,src_final_dst);
+
+	// flood fill
+	floodFillPostprocess(src_final_dst,Scalar::all(2));
+	
+
 	imshow("half",half);
 	imshow("half_dst",half_dst);
 	imshow("src_dst_pryUp",src_dst);
-	//imshow("src_dst_final",src_final_dst);
-	//imshow("mask",m);
-//
-//	// half level
-//
-//	
-//
-//
-//	// src level
-//	//
-//	
+	imshow("src_dst_final",src_final_dst);
+
 	waitKey(0);
 }
 
