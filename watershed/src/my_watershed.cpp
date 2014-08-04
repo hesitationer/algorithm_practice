@@ -51,6 +51,7 @@ int my_watershed(Mat &src, vector<Point> marker)
 		// search from the marker
 		queue<Point> queue;
 		queue.push(seed);
+		flag.data[seed.y*flag.step + seed.x] = 1;
 		draw_point(result,seed,seed_index);
 
 
@@ -58,7 +59,6 @@ int my_watershed(Mat &src, vector<Point> marker)
 
 			Point temp = queue.front();
 			queue.pop();
-			flag.data[temp.y*flag.step + temp.x] = 1;
 
 			// the neighbor
 			for(int i = 0 ; i < 8; i++){
@@ -76,6 +76,7 @@ int my_watershed(Mat &src, vector<Point> marker)
 				if(dis <= DIS_LEVEL){
 
 					queue.push(N_i);
+					flag.data[(temp.y+N8[i].y)*flag.step + (temp.x+N8[i].x)] = 1; // this line!!!
 					draw_point(result,N_i,seed_index);
 				}
 			}// 8-neighbors
