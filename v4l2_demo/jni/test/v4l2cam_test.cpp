@@ -13,6 +13,9 @@
 
 #include "pick_up_test_case.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+
 int socket_server_tansfer_cam_frame()
 {
 	//=====================
@@ -198,7 +201,7 @@ ERIC_TEST(v4l2, check_fmt)
 	printf("img width: %d\n",v4l2_fmt.fmt.pix.width);
 	printf("img height: %d\n",v4l2_fmt.fmt.pix.height);
 
-	printf("img pix format %d--: ",v4l2_fmt.fmt.pix.height);
+	printf("img pix format %d--: ",v4l2_fmt.fmt.pix.pixelformat);
 	int pix_fmt = v4l2_fmt.fmt.pix.pixelformat;
 	char* teller = (char*)(&pix_fmt); 
 	for(int i = 0; i < 4; ++i)
@@ -209,26 +212,61 @@ ERIC_TEST(v4l2, check_fmt)
 }
 
 
+void yuv2rgb422(unsigned char *buf_yuv, unsigned char *buf_rgb, int yuv_size);
+int bmp_write(unsigned char *image, int xsize, int ysize, char *filename); 
+void NV21_2_RGB888(unsigned char* nv21, unsigned char* rgb, int w, int h);
+
+// Need to set the Pixfmt to yuyv
+ERIC_TEST(v4l2,yuyv_get_one_frame)
+{
+	V4L2_Camera cam;
+	cam.open_cam(); 
+
+	char *frame_buf = (char*)malloc(640*480*2*sizeof(char));
+	for (int i = 0; i < 20; i++){ // skip the 20 frames
+		cam.query_frame(frame_buf);
+	}
+	
+	printf("after query_frame\n");
+
+	FILE *fd = fopen("/data/eric/yuyv.bin","wb");
+	if(fd == NULL) {
+	    printf("open file failed\n");
+	}
+	fwrite(frame_buf, 640*480*2, 1, fd);
+	fclose(fd);
+
+	printf("save to: *yuyv.bin*\n");
+	free(frame_buf);
+}
+
 //int test_grab_frame()
-ERIC_TEST(v4l2,get_one_frame)
+ERIC_TEST(v4l2,nv21_get_one_frame)
 {
 	V4L2_Camera cam;
 	cam.open_cam();
 
 	char *frame_buf = (char*)malloc(640*480*3/2*sizeof(char));
-	cam.query_frame(frame_buf);
+	for (int i = 0; i < 20; i++){
+		cam.query_frame(frame_buf);
+	}
+	
 
     printf("after query_frame\n");
-    FILE *fd = fopen("/data/eric/raw.bin","wb");
+    FILE *fd = fopen("/data/eric/nv21.bin","wb");
     if(fd == NULL)
     {
         printf("open file failed\n");
     }
     fwrite(frame_buf, 640*480*3/2, 1, fd);
     fclose(fd);
+
+	//unsigned char rgb_buf[640*480*3] = {0};
+	//NV21_2_RGB888((unsigned char*)frame_buf,rgb_buf,640,480);
+	//bmp_write(rgb_buf,640,480,"nv21_temp");
 }
 
-int test_get_rate()
+ERIC_TEST(v4l2,test_get_rate)
 {
 	V4L2_Camera cam;
 	cam.open_cam();

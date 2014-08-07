@@ -25,7 +25,9 @@ struct v4l2_control_
 //
 //this line is important. Because 'v4l2_control' was used as below
 //
+#ifdef QUANZHI_A20
 #define v4l2_control v4l2_control_ 
+#endif
 
 #ifdef VIDIOC_G_CTRL
 	#undef VIDIOC_G_CTRL
@@ -282,7 +284,8 @@ int V4L2_Camera::set_pixel_format(int pix_fmt)
     format.fmt.pix.width  = img_width_;//img_size should be adjustable
     format.fmt.pix.height = img_height_;
 	format.fmt.pix.pixelformat = pixle_format_;//
-	format.fmt.pix.field = (v4l2_field)1;
+	//format.fmt.pix.field = (v4l2_field)1;
+	format.fmt.pix.field = V4L2_FIELD_NONE;
 
 	ret = ioctl(cam_fd_, VIDIOC_S_FMT, &format);
 	if (ret < 0)
@@ -462,6 +465,14 @@ int V4L2_Camera::check_capability_()
 	{
 		printf("Capture device doesn't support streaming i/o\n");
 		return -3;
+	}
+
+	bool mIsUsbCamera = false;
+	printf("cap.driver is %s\n",cap.driver);
+	if (!strcmp((char *)cap.driver, "uvcvideo"))
+	{
+		mIsUsbCamera = true;
+		printf("is uvvideo!\n");
 	}
 
 	return 0;

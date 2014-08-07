@@ -216,7 +216,7 @@ void yuv2rgb422(unsigned char *buf_yuv, unsigned char *buf_rgb, int yuv_size)
 {
     short y1, y2, u, v;
     unsigned char *pYUV = buf_yuv;
-    unsigned char *pGRB = buf_rgb;
+    unsigned char *pBGR = buf_rgb; //NOTE the order: B, G, R for BMP
     int count = yuv_size / 2;
     for(int i = 0; i < count; i++)
     {
@@ -224,12 +224,13 @@ void yuv2rgb422(unsigned char *buf_yuv, unsigned char *buf_rgb, int yuv_size)
         u = *pYUV++ ;
         y2 = *pYUV++ ;
         v = *pYUV++ ;
-        *pGRB++ = clip(y1 + redAdjust[v]);
-        *pGRB++ = clip(y1 + greenAdjust1[u] + greenAdjust2[v]);
-        *pGRB++ = clip(y1 + blueAdjust[u]);
-        *pGRB++ = clip(y2 + redAdjust[v]);
-        *pGRB++ = clip(y2 + greenAdjust1[u] + greenAdjust2[v]);
-        *pGRB++ = clip(y2 + blueAdjust[u]);
+        *pBGR++ = clip(y1 + blueAdjust[u]);
+        *pBGR++ = clip(y1 + greenAdjust1[u] + greenAdjust2[v]);
+        *pBGR++ = clip(y1 + redAdjust[v]);
+
+        *pBGR++ = clip(y2 + blueAdjust[u]);
+        *pBGR++ = clip(y2 + greenAdjust1[u] + greenAdjust2[v]);
+        *pBGR++ = clip(y2 + redAdjust[v]);
     }
     //rgb565 = (unsigned short)(((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3));
 }
