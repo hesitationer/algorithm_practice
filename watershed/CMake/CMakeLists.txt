@@ -10,7 +10,7 @@ SET(CMAKE_CXX_COMPILER "clang++")
 #SET(CMAKE_CXX_FLAGS "--analyze")
 SET(CMAKE_CXX_FLAGS "-Wall  -std=c++11")
 
-SET(CMAKE_BUILD_TYPE "Release")
+SET(CMAKE_BUILD_TYPE "Debug")
 
 INCLUDE_DIRECTORIES("${PROJECT_ROOT_PATH}/include"
 	"/usr/include"

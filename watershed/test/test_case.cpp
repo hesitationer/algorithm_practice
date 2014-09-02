@@ -14,8 +14,7 @@ int my_watershed(Mat &src, std::vector<Point>);
 ERIC_TEST(watershed, watershed)
 {
 	Mat src;
-	//src = imread("../CMake/fruits.jpg");
-	
+#if 0
 	src.create(512,512,CV_8UC3);	
 	int src_index = 2;
 	if(src_index == 1){
@@ -33,6 +32,9 @@ ERIC_TEST(watershed, watershed)
 			}
 		}
 	}
+#else
+	src = imread("../CMake/fruits.jpg");
+#endif
 
 	imshow("src",src);
 	//waitKey(0);
