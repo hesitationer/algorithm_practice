@@ -120,6 +120,27 @@ ERIC_TEST(temp, init_center)
 	}	
 }
 
+// Test the value of:
+// 		FLT_MAX
+// 		DBL_MAX
+// 		float flt = 1.f;
+ERIC_TEST(temp, dbl_max)
+{
+	cout<<"double max is:"<<FLT_MAX<<endl;
+	int a = 1<<30;
+	if(a > FLT_MAX){
+		cout<<"a > DBL_MAX"<<endl;
+	}
+	else{
+		cout<<"a <= DBL_MAX "<<
+			"and a is:"<<a
+			<<endl;
+	}
+
+	float flt = 1.f;
+	cout<<"1.f is: "<<flt<<endl;
+}
+
 ERIC_TEST(kmeans, cluster)
 {
 

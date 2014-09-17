@@ -3,10 +3,12 @@
 using namespace cv;
 using namespace std;
 
+
 int find_min_dis(Point2f pt, Mat &centers){
 
 	int L = -1;
-	float min_dis = 1 << 30;
+	//float min_dis = 1 << 30;
+	float min_dis = FLT_MAX;
 	for(int i = 0; i < centers.rows; i++){
 		
 		Point2f pt_f = centers.at<Point2f>(i); 
@@ -25,6 +27,11 @@ int find_min_dis(Point2f pt, Mat &centers){
 	}
 
 	return L;
+}
+
+float point_dis(Point2f a, Point2f b)
+{
+	return (a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y); 
 }
 
 int K_means_cluster(Mat &src, int K,  Mat &labels, Mat &centers)
@@ -52,9 +59,47 @@ int K_means_cluster(Mat &src, int K,  Mat &labels, Mat &centers)
 			int L = find_min_dis(pt,centers);
 			labels.at<int>(i) = L;
 
-
 			C_c[L]++ ;C_x[L] += pt.x;C_y[L] += pt.y; 
 			
+		}	
+
+		// process the 0-elements center
+		// extract one sample from the Largest cluster to 0-sample-cluster
+		for (int i = 0; i < K; ++i) {
+			
+			if (C_c[i] != 0) {continue;}	
+			
+			// find the largest cluster
+			int max_cluster_id = -1;
+			for (int j = 0; j < K; ++j) {
+				if(max_cluster_id < C_c[j]){
+					max_cluster_id = j;
+				}
+			}
+
+			// find the farthest sample
+			float max_dis = -1;
+			float max_sample_id = -1;
+			for (int k = 0; k < src.rows; ++k) {
+				if (labels.at<int>(k) != max_cluster_id){continue;}	
+				
+				float dis = point_dis(centers.at<Point2f>(max_cluster_id),
+						src.at<Point2f>(k));
+				if (max_dis < dis) {
+					max_dis = dis;
+					max_sample_id = k;	
+				}
+			}
+
+			// max-cluster --> 0-cluster
+			labels.at<int>(max_sample_id) = i;
+			C_c[i]++;
+		   	C_x[i] += src.at<Point2f>(max_sample_id).x;
+		   	C_y[i] += src.at<Point2f>(max_sample_id).y;
+
+			C_c[max_cluster_id]--;
+			C_x[max_cluster_id] -= src.at<Point2f>(max_sample_id).x;
+			C_y[max_cluster_id] -= src.at<Point2f>(max_sample_id).y;
 		}	
 
 		// compare and update center
@@ -62,7 +107,10 @@ int K_means_cluster(Mat &src, int K,  Mat &labels, Mat &centers)
 		float sum_diff = 0.0;
 		for(int i = 0; i < K; i++){
 			
-			if(C_c[i] == 0){continue;}
+			if(C_c[i] == 0){
+				printf("sitll have 0-cluster!!\n");
+				continue;
+			}
 			float x = C_x[i]/C_c[i];
 			float y = C_y[i]/C_c[i];
 			C.at<Point2f>(i) = Point2f(x,y);
