@@ -2,3 +2,19 @@
 *~
 #swp of gvim
 *.swp
+
+#CMake stuff
+CMakeCache.*
+CMakeFiles/
+Makefile
+*.cmake
+
+#bin
+bin/
+libs/
+obj/
+*.pyc
+
+
+# YCM
+*.json
