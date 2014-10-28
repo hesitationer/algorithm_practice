@@ -76,6 +76,41 @@ ERIC_TEST(b_tree,insert_num)
 	tree.print_breadth_first();
 }
 
+static void post_order_recursive(eric_node* node)
+{
+	if(node->l_child){
+		post_order_recursive(node->l_child);
+	}
+	if(node->r_child){
+		post_order_recursive(node->r_child);
+	}
+
+	cout<< "Mid:"<<node->value<<endl;
+}
+
+ERIC_TEST(b_tree, post_order_recursive)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(17);
+	tree.insert(16);
+
+	tree.print_breadth_first();
+
+	cout<< " after inesrt:" <<tree.get_root()->parent <<endl;
+	cout<< " after inesrt:" <<tree.get_root()->value <<endl;
+
+	cout<<"===post_order_traverse_recursive==="<<endl;
+	post_order_recursive(tree.get_root());
+
+}
 
 ERIC_TEST(b_tree, post_order_no_recusive)
 {
