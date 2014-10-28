@@ -1,12 +1,28 @@
 #include "pick_up_test_case.h"
 #include "b_tree.h"
 
+#include <iostream>
+
+using namespace std;
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 #pragma GCC diagnostic ignored "-Wunused-variable"
 ERIC_TEST(b_tree,instance)
 {
 	b_tree tree;
+}
+
+ERIC_TEST(b_tree, str_node_insert)
+{
+	b_tree tree;
+
+	tree.insert("c1",NULL);
+	tree.insert("c2",NULL);
+	tree.insert("c3",NULL);
+	tree.insert("c4",NULL);
+	tree.insert("c5",NULL);
+	tree.print_depth_first();
 }
 
 ERIC_TEST(b_tree,print_breadth_first)
@@ -43,7 +59,7 @@ ERIC_TEST(b_tree,print_breadth_first)
 	//tree.print_breadth_first();
 }
 
-ERIC_TEST(b_tree,insert)
+ERIC_TEST(b_tree,insert_num)
 {
 	b_tree tree;
 
@@ -57,6 +73,62 @@ ERIC_TEST(b_tree,insert)
 	tree.insert(17);
 	tree.insert(16);
 
+	tree.print_breadth_first();
+}
+
+
+ERIC_TEST(b_tree, post_order_no_recusive)
+{
+	b_tree tree;
+
+	tree.insert(15);
+	tree.insert(5);
+	tree.insert(25);
+	tree.insert(2);
+	tree.insert(8);
+	tree.insert(30);
+	tree.insert(20);
+	tree.insert(17);
+	tree.insert(16);
+
+	tree.print_breadth_first();
+
+	cout<< " after inesrt:" <<tree.get_root()->parent <<endl;
+	cout<< " after inesrt:" <<tree.get_root()->value <<endl;
+
+	cout<<"===post_order_traverse==="<<endl;
+
+	
+	eric_node *node = tree.get_root();
+
+	while(1){
+
+		// LEFT
+		while(node->l_child){// find the left-most leaf
+			node = node->l_child;
+		}
+		cout<< "L  :" <<node->value <<endl;
+
+		// here is node, which has sub-tree 
+		// but will 
+		eric_node *parent_node = NULL;
+		parent_node = node->parent;
+		while(parent_node && parent_node->r_child == node){
+
+			cout<< "R  :"<< node->value <<endl;
+			cout<< "Mid:"<< parent_node->value <<endl;
+			node = parent_node;
+			parent_node = parent_node->parent;
+		}
+
+		//if(node == tree.get_root()){
+		if(!parent_node){
+			break;
+		}
+
+		// RIGHT
+		node = parent_node->r_child; // turn to the right
+	}
 }
 
 
@@ -376,6 +448,7 @@ ERIC_TEST(b_tree, node_depth)
 	temp = tree.insert(16);
 	printf("depth is: %d\n",tree.get_node_depth_(temp));
 }
+
 
 // 1. check the value like: 010;
 // 2. check if L_L == ROOT_NODE
