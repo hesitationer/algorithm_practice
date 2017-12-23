@@ -15,6 +15,15 @@ libs/
 obj/
 *.pyc
 
+#visual studio .sln
+Release/
+*.user
+*.suo
+*.sdf
+*.opensdf
+
+# use opencv
+ipch/
 
 # YCM
 *.json
