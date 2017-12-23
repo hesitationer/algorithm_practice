@@ -90,7 +90,6 @@ namespace quant
 
     // 返回第 i  个下标
     int idx(int i);
-    uchar ith_bit(uchar x, int i);
   };
 
 }

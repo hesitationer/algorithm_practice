@@ -83,7 +83,7 @@ namespace quant {
   XNodePtr octree_quantization::find_node_to_collapse()
   {
     // 从第七层开始找
-    for (int L = 7; L >=1 ; --L){ // 先从第7层开始找
+    for (int L = 7; L >=1 ; --L){
       auto& Li_List = get_level_list(L);
       if (!Li_List.empty()){
         auto p = Li_List.front();
@@ -107,7 +107,6 @@ namespace quant {
 
   // 向树中插入 pix，非递归，固定插入8次！
   // 记录 Node 的 level-number
-
   void octree_quantization::insert(XNodePtr root, XPixel pix)
   {
     auto node = root;
@@ -133,8 +132,6 @@ namespace quant {
   } // insert
 
   // 构造树. 返回根结点
-  // 1 读取图片，执行 insert() 操作
-  // 2 new 一个 root 节点
   XNodePtr octree_quantization::build_tree(cv::Mat& img)
   {
     for (int i = 0; i < img.rows; ++i){
@@ -155,7 +152,7 @@ namespace quant {
 
   // 遍历树，
   // 给定一个XPixel，找到其对应的 leaf_node. 
-  // 返回 leaf_node 的颜色
+  // 读取 leaf_node 的颜色，转为返回XPixle
   XPixel octree_quantization::map_pixel_to_leaf_node(XPixel pix)
   {
     XNodePtr pNode = root();
@@ -194,27 +191,7 @@ namespace quant {
         index |= 1;
     }
 
-    uchar r = ith_bit(r_, i);
-    uchar g = ith_bit(g_, i);
-    uchar b = ith_bit(b_, i);
-
-    r = (r << 2);
-    g = (g << 1);
-
-    uchar z = r | g | b; 
-    if (z != index){
-      return index;
-    } else{ 
-      return z;
-    }
-  }
-
-  uchar XPixel::ith_bit(uchar x, int i)
-  {
-    x = x >> (7 - i); // 右移，e.g. 最高位，8位，右移7
-    x = x & 0x01; // 只保留最低位，高七位变零。
-
-    return x;
+    return index;
   }
 
   void XNode::merge(XNodePtr other)
