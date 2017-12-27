@@ -17,6 +17,7 @@ obj/
 
 #visual studio .sln
 Release/
+Debug/
 *.user
 *.suo
 *.sdf
